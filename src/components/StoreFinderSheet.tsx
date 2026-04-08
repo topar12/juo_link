@@ -1,11 +1,12 @@
 "use client";
 
-import { useDeferredValue, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { motion } from "framer-motion";
 import { CrosshairSimple, MagnifyingGlass, MapPin, Sparkle, X } from "@phosphor-icons/react";
 import clsx from "clsx";
 import storeLocations from "@/data/storeLocations.json";
+import { trackEvent } from "@/lib/analytics";
 
 type StoreFinderSheetProps = {
   onClose: () => void;
@@ -183,6 +184,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const storeCardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const lastFilterSignatureRef = useRef("");
+  const lastSearchSignatureRef = useRef("");
 
   const [mapReady, setMapReady] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
@@ -229,6 +231,20 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
 
   const selectedStore =
     filteredStores.find((store) => store.id === effectiveSelectedStoreId) ?? null;
+
+  const handleStoreSelect = useCallback((
+    store: (typeof preparedStores)[number],
+    source: "map_pin" | "list_card"
+  ) => {
+    setSelectedStoreId(store.id);
+    trackEvent("store_select", {
+      source,
+      store_name: store.displayName,
+      store_category: store.category,
+      store_categories: store.displayCategories.join(","),
+      is_direct: store.isDirect ? "true" : "false",
+    });
+  }, []);
 
   useEffect(() => {
     if (!appKey || !scriptReady || !mapContainerRef.current || mapRef.current) {
@@ -291,7 +307,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
       });
 
       maps.event.addListener(marker, "click", () => {
-        setSelectedStoreId(store.id);
+        handleStoreSelect(store, "map_pin");
       });
 
       markersRef.current.push(marker);
@@ -311,7 +327,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     if (selectedStore) {
       map.panTo(new maps.LatLng(selectedStore.lat, selectedStore.lng));
     }
-  }, [activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore]);
+  }, [activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore, handleStoreSelect]);
 
   useEffect(() => {
     if (!effectiveSelectedStoreId) {
@@ -325,7 +341,34 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     });
   }, [effectiveSelectedStoreId]);
 
+  useEffect(() => {
+    if (normalizedQuery.length === 0) {
+      return;
+    }
+
+    const signature = `${normalizedQuery}|${activeCategory}|${filteredStores.length}`;
+    if (lastSearchSignatureRef.current === signature) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      lastSearchSignatureRef.current = signature;
+      trackEvent("store_search", {
+        active_category: activeCategory,
+        query_length: normalizedQuery.length,
+        result_count: filteredStores.length,
+        has_result: filteredStores.length > 0 ? "true" : "false",
+      });
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeCategory, filteredStores.length, normalizedQuery]);
+
   const handleLocateMe = () => {
+    trackEvent("locate_me_click", {
+      source: "store_finder_map",
+    });
+
     if (!navigator.geolocation) {
       setLocationError("현재 브라우저에서는 위치 기능을 사용할 수 없어요.");
       return;
@@ -442,7 +485,12 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                   <button
                     key={category}
                     type="button"
-                    onClick={() => setActiveCategory(category)}
+                    onClick={() => {
+                      setActiveCategory(category);
+                      trackEvent("store_filter_select", {
+                        category,
+                      });
+                    }}
                     className={clsx(
                       "shrink-0 rounded-full border-2 px-4 py-2 text-xs font-bold tracking-tight transition-all duration-200",
                       category === ALL_CATEGORY &&
@@ -513,7 +561,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                           storeCardRefs.current[store.id] = node;
                         }}
                         type="button"
-                        onClick={() => setSelectedStoreId(store.id)}
+                        onClick={() => handleStoreSelect(store, "list_card")}
                         className={clsx(
                           "relative flex w-full scroll-mt-4 flex-col items-start gap-3 overflow-hidden rounded-2xl border-2 p-4 text-left transition-all duration-200 active:scale-[0.98]",
                           isActive && store.isDirect && "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.7)]",

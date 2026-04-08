@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import IntroAnimation from "@/components/IntroAnimation";
 import StoreFinderSheet from "@/components/StoreFinderSheet";
+import { trackEvent } from "@/lib/analytics";
 import { 
   ShoppingCart, 
   Crown, 
@@ -30,6 +31,24 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [productTab, setProductTab] = useState<"dog" | "cat">("dog");
   const [showStoreFinder, setShowStoreFinder] = useState(false);
+
+  const handleStoreFinderOpen = () => {
+    trackEvent("store_finder_open", {
+      location: "footer_cta",
+    });
+    setShowStoreFinder(true);
+  };
+
+  const handleSocialClick = (channel: "instagram" | "kakao" | "blog") => {
+    trackEvent("social_click", {
+      channel,
+      location: "footer",
+    });
+
+    if (channel === "blog") {
+      alert("준비중입니다.");
+    }
+  };
 
   return (
     <>
@@ -176,6 +195,11 @@ export default function Home() {
               icon={<ShoppingCart weight="bold" className="text-xl" />} 
               label="주오 공식몰 바로가기" 
               href="https://www.lovejuo.com/shop/"
+              onClick={() =>
+                trackEvent("official_mall_click", {
+                  location: "main_cta",
+                })
+              }
               primary 
             />
           </section>
@@ -190,6 +214,11 @@ export default function Home() {
                 desc="몇 가지 질문만으로 우리 아이 맞춤 간식을 찾아보세요"
                 imageSrc="/images/test.webp"
                 href="https://meong-bti.netlify.app/"
+                onClick={() =>
+                  trackEvent("meongbti_click", {
+                    location: "event_card",
+                  })
+                }
               />
             </div>
           </section>
@@ -237,13 +266,30 @@ export default function Home() {
             <ActionButton 
               icon={<MapPin weight="bold" className="text-xl" />} 
               label="가까운 직영/제휴 매장 찾기" 
-              onClick={() => setShowStoreFinder(true)}
+              onClick={handleStoreFinderOpen}
             />
             
             <div className="flex gap-3">
-              <SocialButton icon={<InstagramLogo weight="bold" />} href="https://www.instagram.com/petfood.thejuo/" variant="instagram" label="Insta" />
-              <SocialButton icon={<ChatCircleText weight="bold" />} href="http://pf.kakao.com/_xehxasn" variant="kakao" label="Kakao" />
-              <SocialButton icon={<NewspaperClipping weight="bold" />} variant="blog" label="Blog" onClick={() => alert('준비중입니다.')} />
+              <SocialButton
+                icon={<InstagramLogo weight="bold" />}
+                href="https://www.instagram.com/petfood.thejuo/"
+                variant="instagram"
+                label="Insta"
+                onClick={() => handleSocialClick("instagram")}
+              />
+              <SocialButton
+                icon={<ChatCircleText weight="bold" />}
+                href="http://pf.kakao.com/_xehxasn"
+                variant="kakao"
+                label="Kakao"
+                onClick={() => handleSocialClick("kakao")}
+              />
+              <SocialButton
+                icon={<NewspaperClipping weight="bold" />}
+                variant="blog"
+                label="Blog"
+                onClick={() => handleSocialClick("blog")}
+              />
             </div>
             
             <div className="flex flex-col items-start gap-1">
@@ -330,7 +376,7 @@ function ActionButton({ icon, label, primary = false, href, onClick }: { icon: R
 
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={onClick}>
         {content}
       </a>
     );
@@ -440,7 +486,7 @@ function EventCard({ badge, title, desc, imageSrc, href, onClick }: { badge: str
 
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={onClick}>
         {content}
       </a>
     );
@@ -510,7 +556,7 @@ function SocialButton({ icon, href, onClick, variant = "default", label }: { ico
   
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={onClick}>
         {content}
       </a>
     );
