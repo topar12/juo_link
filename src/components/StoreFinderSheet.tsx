@@ -490,38 +490,6 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
               </div>
             ) : null}
 
-            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {categoryOptions.map((category) => {
-                const isActive = activeCategory === category;
-                const style =
-                  category === ALL_CATEGORY
-                    ? null
-                    : CATEGORY_BUTTON_STYLES[category];
-                return (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => {
-                      setActiveCategory(category);
-                      trackEvent("store_filter_select", {
-                        category,
-                      });
-                    }}
-                    className={clsx(
-                      "shrink-0 rounded-full border-2 px-4 py-2 text-xs font-bold tracking-tight transition-all duration-200",
-                      category === ALL_CATEGORY &&
-                        (isActive
-                          ? "border-slate-900 bg-slate-900 text-white shadow-[2px_2px_0px_0px_rgba(255,107,107,0.65)]"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"),
-                      category !== ALL_CATEGORY && (isActive ? style?.active : style?.idle)
-                    )}
-                  >
-                    {category}
-                  </button>
-                );
-              })}
-            </div>
-
             <div
               ref={mapSectionRef}
               className="relative min-h-[240px] scroll-mt-24 overflow-hidden rounded-[24px] border-2 border-slate-200 bg-white shadow-[4px_4px_0px_0px_rgba(30,41,59,0.08)]"
@@ -585,6 +553,38 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                   직영만 보기
                 </button>
               </div>
+            </div>
+
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+              {categoryOptions.map((category) => {
+                const isActive = activeCategory === category;
+                const style =
+                  category === ALL_CATEGORY
+                    ? null
+                    : CATEGORY_BUTTON_STYLES[category];
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => {
+                      setActiveCategory(category);
+                      trackEvent("store_filter_select", {
+                        category,
+                      });
+                    }}
+                    className={clsx(
+                      "shrink-0 rounded-full border-2 px-4 py-2 text-xs font-bold tracking-tight transition-all duration-200",
+                      category === ALL_CATEGORY &&
+                        (isActive
+                          ? "border-slate-900 bg-slate-900 text-white shadow-[2px_2px_0px_0px_rgba(255,107,107,0.65)]"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"),
+                      category !== ALL_CATEGORY && (isActive ? style?.active : style?.idle)
+                    )}
+                  >
+                    {category}
+                  </button>
+                );
+              })}
             </div>
 
             {selectedStore ? (
@@ -671,7 +671,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
             <div className="flex flex-col gap-3 pb-2">
               {filteredStores.length > 0 ? (
                 filteredStores.map((store) => {
-                  const isActive = store.id === selectedStore?.id;
+                  const isSelected = store.id === selectedStore?.id;
                   return (
                     <button
                       key={store.id}
@@ -679,17 +679,17 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                         storeCardRefs.current[store.id] = node;
                       }}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => handleStoreSelect(store, "list_card")}
                       className={clsx(
                         "relative flex w-full scroll-mt-4 flex-col items-start gap-3 overflow-hidden rounded-2xl border-2 p-4 text-left transition-all duration-200 active:scale-[0.98]",
-                        isActive && store.isDirect && "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.7)]",
-                        isActive && !store.isDirect && "border-slate-900 bg-slate-900 text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.55)]",
-                        !isActive && store.isDirect && "border-brand-coral-200 bg-[linear-gradient(135deg,#fff8f2_0%,#ffffff_68%)] text-slate-900 shadow-[3px_3px_0px_0px_rgba(255,107,107,0.16)] hover:-translate-y-0.5 hover:border-brand-coral-500 hover:shadow-[5px_5px_0px_0px_rgba(255,107,107,0.22)]",
-                        !isActive && !store.isDirect && "border-slate-200 bg-white text-slate-900 hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)]"
+                        store.isDirect
+                          ? "border-brand-coral-200 bg-[linear-gradient(135deg,#fff8f2_0%,#ffffff_68%)] text-slate-900 shadow-[3px_3px_0px_0px_rgba(255,107,107,0.16)] hover:-translate-y-0.5 hover:border-brand-coral-500 hover:shadow-[5px_5px_0px_0px_rgba(255,107,107,0.22)]"
+                          : "border-slate-200 bg-white text-slate-900 hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)]"
                       )}
                     >
                       {store.isDirect ? (
-                        <div className={clsx("absolute right-0 top-0 h-24 w-24 rounded-full blur-2xl", isActive ? "bg-brand-coral-500/20" : "bg-brand-coral-200/45")} />
+                        <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-brand-coral-200/45 blur-2xl" />
                       ) : null}
                       <div className="flex w-full items-start justify-between gap-4">
                         <div className="flex min-w-0 flex-col gap-2">
@@ -699,9 +699,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                                 key={`${store.id}-${category}`}
                                 className={clsx(
                                   "inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]",
-                                  isActive
-                                    ? "bg-white text-slate-900"
-                                    : CATEGORY_BUTTON_STYLES[category].idle
+                                  CATEGORY_BUTTON_STYLES[category].idle
                                 )}
                               >
                                 {category}
@@ -709,12 +707,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                             ))}
                             {store.isDirect ? (
                               <span
-                                className={clsx(
-                                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
-                                  isActive
-                                    ? "border-white/20 bg-white/10 text-white"
-                                    : "border-brand-coral-200 bg-white text-brand-coral-600"
-                                )}
+                                className="inline-flex items-center gap-1 rounded-full border border-brand-coral-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-coral-600"
                               >
                                 <Sparkle weight="fill" className="text-[11px]" />
                                 직영
@@ -728,11 +721,9 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                         <div
                           className={clsx(
                             "flex h-10 min-w-[44px] items-center justify-center rounded-xl border px-3 transition-all duration-200",
-                            isActive
-                              ? "border-white/20 bg-white/10 text-white"
-                              : store.isDirect
-                                ? "border-brand-coral-200 bg-white text-brand-coral-500"
-                                : "border-slate-200 bg-slate-50 text-slate-700"
+                            store.isDirect
+                              ? "border-brand-coral-200 bg-white text-brand-coral-500"
+                              : "border-slate-200 bg-slate-50 text-slate-700"
                           )}
                         >
                           <MapPin weight="fill" className="text-base" />
@@ -742,26 +733,21 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                       <div
                         className={clsx(
                           "flex w-full items-start gap-3 rounded-2xl border px-3 py-3",
-                          isActive
-                            ? "border-white/10 bg-white/8"
-                            : store.isDirect
-                              ? "border-brand-coral-100 bg-brand-coral-50/55"
-                              : "border-slate-100 bg-slate-50"
+                          store.isDirect
+                            ? "border-brand-coral-100 bg-brand-coral-50/55"
+                            : "border-slate-100 bg-slate-50"
                         )}
                       >
                         <MapPin
                           weight="fill"
                           className={clsx(
                             "mt-0.5 shrink-0 text-sm",
-                            isActive ? "text-brand-coral-200" : "text-slate-400"
+                            store.isDirect ? "text-brand-coral-400" : "text-slate-400"
                           )}
                         />
                         <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
                           <p
-                            className={clsx(
-                              "text-xs font-medium leading-relaxed",
-                              isActive ? "text-slate-200" : "text-slate-500"
-                            )}
+                            className="text-xs font-medium leading-relaxed text-slate-500"
                           >
                             {store.address}
                           </p>
@@ -782,12 +768,8 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                             className={clsx(
                               "mt-0.5 inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold transition-all duration-200",
                               copiedStoreId === store.id
-                                ? isActive
-                                  ? "border-white/20 bg-white/12 text-white"
-                                  : "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                : isActive
-                                  ? "border-white/10 bg-white/6 text-slate-100 hover:bg-white/12"
-                                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-400 hover:text-slate-800"
+                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                : "border-slate-200 bg-white text-slate-500 hover:border-slate-400 hover:text-slate-800"
                             )}
                             aria-label={`${store.displayName} 주소 복사`}
                           >
