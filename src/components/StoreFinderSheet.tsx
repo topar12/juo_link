@@ -91,6 +91,7 @@ type KakaoWindow = Window & {
 
 const ALL_CATEGORY = "전체";
 const MAP_CENTER = { lat: 36.35, lng: 127.82 };
+const SELECTED_STORE_MAP_LEVEL = 4;
 const DIRECT_STORE_KEYWORDS = ["요미독", "요미캣", "사랑해주오", "치료해주오"];
 const DIRECT_MARKER_COLOR = "#FF6B6B";
 const CATEGORY_MARKER_COLORS: Record<StoreCategory, string> = {
@@ -329,17 +330,26 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     if (filtersChanged) {
       if (filteredStores.length === 1) {
         map.setCenter(new maps.LatLng(filteredStores[0].lat, filteredStores[0].lng));
-        map.setLevel(4);
+        map.setLevel(SELECTED_STORE_MAP_LEVEL);
       } else {
         map.setBounds(bounds, 56, 56, 56, 56);
       }
       return;
     }
-
-    if (selectedStore) {
-      map.panTo(new maps.LatLng(selectedStore.lat, selectedStore.lng));
-    }
   }, [activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore, handleStoreSelect, showDirectOnly]);
+
+  useEffect(() => {
+    const kakao = (window as KakaoWindow).kakao;
+    const maps = kakao?.maps;
+    const map = mapRef.current;
+
+    if (!mapReady || !maps || !map || !selectedStore) {
+      return;
+    }
+
+    map.setLevel(SELECTED_STORE_MAP_LEVEL);
+    map.panTo(new maps.LatLng(selectedStore.lat, selectedStore.lng));
+  }, [mapReady, selectedStore]);
 
   useEffect(() => {
     if (normalizedQuery.length === 0) {
