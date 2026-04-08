@@ -13,6 +13,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.2",
     "@phosphor-icons/react": "^2.1.10",
     "@remotion/player": "^4.0.446",
     "clsx": "^2.1.1",
