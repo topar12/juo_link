@@ -3,7 +3,7 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { motion } from "framer-motion";
-import { CrosshairSimple, MagnifyingGlass, MapPin, Sparkle, X } from "@phosphor-icons/react";
+import { Copy, CrosshairSimple, MagnifyingGlass, MapPin, Sparkle, X } from "@phosphor-icons/react";
 import clsx from "clsx";
 import storeLocations from "@/data/storeLocations.json";
 import { trackEvent } from "@/lib/analytics";
@@ -181,6 +181,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
   const mapRef = useRef<KakaoMapInstance | null>(null);
   const markersRef = useRef<KakaoMarkerInstance[]>([]);
   const currentLocationMarkerRef = useRef<KakaoMarkerInstance | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const storeCardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const lastFilterSignatureRef = useRef("");
@@ -193,7 +194,9 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
   const [isLocating, setIsLocating] = useState(false);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<StoreCategory | typeof ALL_CATEGORY>(ALL_CATEGORY);
+  const [showDirectOnly, setShowDirectOnly] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  const [copiedStoreId, setCopiedStoreId] = useState<string | null>(null);
 
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
@@ -209,6 +212,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
   const filteredStores = preparedStores.filter((store) => {
     const matchesCategory =
       activeCategory === ALL_CATEGORY || store.displayCategories.includes(activeCategory);
+    const matchesDirectOnly = !showDirectOnly || store.isDirect;
     const matchesQuery =
       normalizedQuery.length === 0 ||
       store.displayName.toLowerCase().includes(normalizedQuery) ||
@@ -216,7 +220,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
       store.displayCategories.some((category) => category.toLowerCase().includes(normalizedQuery)) ||
       store.rawCategory.toLowerCase().includes(normalizedQuery);
 
-    return matchesCategory && matchesQuery;
+    return matchesCategory && matchesDirectOnly && matchesQuery;
   }).sort((left, right) => {
     if (left.isDirect !== right.isDirect) {
       return Number(right.isDirect) - Number(left.isDirect);
@@ -237,6 +241,14 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     source: "map_pin" | "list_card"
   ) => {
     setSelectedStoreId(store.id);
+
+    if (source === "list_card") {
+      mapSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
     trackEvent("store_select", {
       source,
       store_name: store.displayName,
@@ -288,7 +300,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     }
 
     const bounds = new maps.LatLngBounds();
-    const filterSignature = `${activeCategory}|${normalizedQuery}|${filteredStores
+    const filterSignature = `${activeCategory}|${showDirectOnly}|${normalizedQuery}|${filteredStores
       .map((store) => store.id)
       .join(",")}`;
     const filtersChanged = lastFilterSignatureRef.current !== filterSignature;
@@ -327,26 +339,14 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     if (selectedStore) {
       map.panTo(new maps.LatLng(selectedStore.lat, selectedStore.lng));
     }
-  }, [activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore, handleStoreSelect]);
-
-  useEffect(() => {
-    if (!effectiveSelectedStoreId) {
-      return;
-    }
-
-    const card = storeCardRefs.current[effectiveSelectedStoreId];
-    card?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
-  }, [effectiveSelectedStoreId]);
+  }, [activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore, handleStoreSelect, showDirectOnly]);
 
   useEffect(() => {
     if (normalizedQuery.length === 0) {
       return;
     }
 
-    const signature = `${normalizedQuery}|${activeCategory}|${filteredStores.length}`;
+    const signature = `${normalizedQuery}|${activeCategory}|${showDirectOnly}|${filteredStores.length}`;
     if (lastSearchSignatureRef.current === signature) {
       return;
     }
@@ -355,6 +355,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
       lastSearchSignatureRef.current = signature;
       trackEvent("store_search", {
         active_category: activeCategory,
+        direct_only: showDirectOnly ? 'true' : 'false',
         query_length: normalizedQuery.length,
         result_count: filteredStores.length,
         has_result: filteredStores.length > 0 ? "true" : "false",
@@ -362,7 +363,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, [activeCategory, filteredStores.length, normalizedQuery]);
+  }, [activeCategory, filteredStores.length, normalizedQuery, showDirectOnly]);
 
   const handleLocateMe = () => {
     trackEvent("locate_me_click", {
@@ -411,6 +412,21 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     );
   };
 
+  const handleCopyAddress = async (storeId: string, address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedStoreId(storeId);
+      trackEvent("store_address_copy", {
+        store_id: storeId,
+      });
+      window.setTimeout(() => {
+        setCopiedStoreId((current) => (current === storeId ? null : current));
+      }, 1600);
+    } catch {
+      setLocationError("주소 복사에 실패했어요. 다시 시도해주세요.");
+    }
+  };
+
   return (
     <>
       {appKey ? (
@@ -430,7 +446,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
         transition={{ duration: 0.22, ease: "easeOut" }}
         className="absolute inset-0 z-40 bg-slate-50"
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col overflow-y-auto">
           <div className="sticky top-0 z-10 border-b-2 border-slate-200 bg-slate-50/95 px-5 pb-4 pt-5 backdrop-blur-sm">
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-col items-start gap-2">
@@ -457,7 +473,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-4 px-5 py-4">
+          <div className="flex flex-col gap-4 px-5 py-4 pb-6">
             <div className="relative">
               <MagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
               <input
@@ -506,7 +522,10 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
               })}
             </div>
 
-            <div className="relative min-h-[240px] overflow-hidden rounded-[24px] border-2 border-slate-200 bg-white shadow-[4px_4px_0px_0px_rgba(30,41,59,0.08)]">
+            <div
+              ref={mapSectionRef}
+              className="relative min-h-[240px] scroll-mt-24 overflow-hidden rounded-[24px] border-2 border-slate-200 bg-white shadow-[4px_4px_0px_0px_rgba(30,41,59,0.08)]"
+            >
               {appKey ? (
                 <>
                   <div ref={mapContainerRef} className="h-[34vh] min-h-[240px] w-full bg-slate-100" />
@@ -542,102 +561,202 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
               )}
             </div>
 
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+            <div className="flex items-center px-1">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                 <MapPin weight="fill" className="text-brand-coral-500" />
                 <span>{filteredStores.length}개 제휴처</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextValue = !showDirectOnly;
+                    setShowDirectOnly(nextValue);
+                    trackEvent("store_filter_select", {
+                      category: nextValue ? "직영만" : "전체",
+                    });
+                  }}
+                  className={clsx(
+                    "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-black tracking-[0.12em] shadow-[2px_2px_0px_0px_rgba(30,41,59,0.08)] transition-all duration-200 hover:-translate-y-0.5",
+                    showDirectOnly
+                      ? "border-brand-coral-500 bg-[linear-gradient(135deg,#ff7f7f_0%,#ff6b6b_100%)] text-white shadow-[3px_3px_0px_0px_rgba(255,107,107,0.22)]"
+                      : "border-brand-coral-200 bg-white text-brand-coral-600 hover:border-brand-coral-500 hover:bg-brand-coral-50 hover:text-brand-coral-700"
+                  )}
+                >
+                  <Sparkle weight="fill" className="text-[11px]" />
+                  직영만 보기
+                </button>
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto pb-4">
-              <div className="flex flex-col gap-3">
-                {filteredStores.length > 0 ? (
-                  filteredStores.map((store) => {
-                    const isActive = store.id === selectedStore?.id;
-                    return (
-                      <button
-                        key={store.id}
-                        ref={(node) => {
-                          storeCardRefs.current[store.id] = node;
-                        }}
-                        type="button"
-                        onClick={() => handleStoreSelect(store, "list_card")}
-                        className={clsx(
-                          "relative flex w-full scroll-mt-4 flex-col items-start gap-3 overflow-hidden rounded-2xl border-2 p-4 text-left transition-all duration-200 active:scale-[0.98]",
-                          isActive && store.isDirect && "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.7)]",
-                          isActive && !store.isDirect && "border-slate-900 bg-slate-900 text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.55)]",
-                          !isActive && store.isDirect && "border-brand-coral-200 bg-[linear-gradient(135deg,#fff8f2_0%,#ffffff_68%)] text-slate-900 shadow-[3px_3px_0px_0px_rgba(255,107,107,0.16)] hover:-translate-y-0.5 hover:border-brand-coral-500 hover:shadow-[5px_5px_0px_0px_rgba(255,107,107,0.22)]",
-                          !isActive && !store.isDirect && "border-slate-200 bg-white text-slate-900 hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)]"
-                        )}
-                      >
-                        {store.isDirect ? (
-                          <div className={clsx("absolute right-0 top-0 h-24 w-24 rounded-full blur-2xl", isActive ? "bg-brand-coral-500/20" : "bg-brand-coral-200/45")} />
-                        ) : null}
-                        <div className="flex w-full items-start justify-between gap-4">
-                          <div className="flex min-w-0 flex-col gap-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {store.displayCategories.map((category) => (
-                                <span
-                                  key={`${store.id}-${category}`}
-                                  className={clsx(
-                                    "inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]",
-                                    isActive
-                                      ? "bg-white text-slate-900"
-                                      : CATEGORY_BUTTON_STYLES[category].idle
-                                  )}
-                                >
-                                  {category}
-                                </span>
-                              ))}
-                              {store.isDirect ? (
-                                <span
-                                  className={clsx(
-                                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
-                                    isActive
-                                      ? "border-white/20 bg-white/10 text-white"
-                                      : "border-brand-coral-200 bg-white text-brand-coral-600"
-                                  )}
-                                >
-                                  <Sparkle weight="fill" className="text-[11px]" />
-                                  직영
-                                </span>
-                              ) : null}
-                            </div>
-                            <strong className="text-sm font-black tracking-tight">
-                              {store.displayName}
-                            </strong>
-                          </div>
-                          <div
-                            className={clsx(
-                              "relative z-10 flex h-10 min-w-[44px] items-center justify-center rounded-xl border px-3 transition-all duration-200",
-                              isActive
-                                ? "border-white/20 bg-white/10 text-white"
-                                : store.isDirect
-                                  ? "border-brand-coral-200 bg-white text-brand-coral-500"
-                                  : "border-slate-200 bg-slate-50 text-slate-700"
-                            )}
-                          >
-                            <MapPin weight="fill" className="text-base" />
-                          </div>
-                        </div>
+            {selectedStore ? (
+              <div
+                className={clsx(
+                  "relative overflow-hidden rounded-2xl border-2 p-4 shadow-[4px_4px_0px_0px_rgba(30,41,59,0.08)]",
+                  selectedStore.isDirect
+                    ? "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.38)]"
+                    : "border-slate-900 bg-slate-900 text-white"
+                )}
+              >
+                {selectedStore.isDirect ? (
+                  <div className="absolute right-0 top-0 h-28 w-28 rounded-full bg-brand-coral-500/20 blur-3xl" />
+                ) : null}
+                <div className="relative flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-coral-200">
+                      Selected Store
+                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {selectedStore.displayCategories.map((category) => (
+                        <span
+                          key={`selected-${selectedStore.id}-${category}`}
+                          className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-900"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                      {selectedStore.isDirect ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white">
+                          <Sparkle weight="fill" className="text-[11px]" />
+                          직영
+                        </span>
+                      ) : null}
+                    </div>
+                    <strong className="text-base font-black tracking-tight">{selectedStore.displayName}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStoreId(null)}
+                    className="relative z-10 inline-flex shrink-0 items-center gap-1 rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition-all duration-200 hover:bg-white/14"
+                  >
+                    <X className="text-[10px]" weight="bold" />
+                    해제
+                  </button>
+                </div>
 
+                <div className="relative mt-3 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
+                  <MapPin weight="fill" className="mt-0.5 shrink-0 text-sm text-brand-coral-200" />
+                  <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
+                    <p className="text-xs font-medium leading-relaxed text-slate-200">
+                      {selectedStore.address}
+                    </p>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleCopyAddress(selectedStore.id, selectedStore.address);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          handleCopyAddress(selectedStore.id, selectedStore.address);
+                        }
+                      }}
+                      className={clsx(
+                        "mt-0.5 inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold transition-all duration-200",
+                        copiedStoreId === selectedStore.id
+                          ? "border-white/20 bg-white/14 text-white"
+                          : "border-white/10 bg-white/6 text-slate-100 hover:bg-white/12"
+                      )}
+                      aria-label={`${selectedStore.displayName} 주소 복사`}
+                    >
+                      <Copy className="text-[10px]" weight="bold" />
+                      {copiedStoreId === selectedStore.id ? "복사됨" : "복사"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="flex flex-col gap-3 pb-2">
+              {filteredStores.length > 0 ? (
+                filteredStores.map((store) => {
+                  const isActive = store.id === selectedStore?.id;
+                  return (
+                    <button
+                      key={store.id}
+                      ref={(node) => {
+                        storeCardRefs.current[store.id] = node;
+                      }}
+                      type="button"
+                      onClick={() => handleStoreSelect(store, "list_card")}
+                      className={clsx(
+                        "relative flex w-full scroll-mt-4 flex-col items-start gap-3 overflow-hidden rounded-2xl border-2 p-4 text-left transition-all duration-200 active:scale-[0.98]",
+                        isActive && store.isDirect && "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.7)]",
+                        isActive && !store.isDirect && "border-slate-900 bg-slate-900 text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.55)]",
+                        !isActive && store.isDirect && "border-brand-coral-200 bg-[linear-gradient(135deg,#fff8f2_0%,#ffffff_68%)] text-slate-900 shadow-[3px_3px_0px_0px_rgba(255,107,107,0.16)] hover:-translate-y-0.5 hover:border-brand-coral-500 hover:shadow-[5px_5px_0px_0px_rgba(255,107,107,0.22)]",
+                        !isActive && !store.isDirect && "border-slate-200 bg-white text-slate-900 hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)]"
+                      )}
+                    >
+                      {store.isDirect ? (
+                        <div className={clsx("absolute right-0 top-0 h-24 w-24 rounded-full blur-2xl", isActive ? "bg-brand-coral-500/20" : "bg-brand-coral-200/45")} />
+                      ) : null}
+                      <div className="flex w-full items-start justify-between gap-4">
+                        <div className="flex min-w-0 flex-col gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {store.displayCategories.map((category) => (
+                              <span
+                                key={`${store.id}-${category}`}
+                                className={clsx(
+                                  "inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]",
+                                  isActive
+                                    ? "bg-white text-slate-900"
+                                    : CATEGORY_BUTTON_STYLES[category].idle
+                                )}
+                              >
+                                {category}
+                              </span>
+                            ))}
+                            {store.isDirect ? (
+                              <span
+                                className={clsx(
+                                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
+                                  isActive
+                                    ? "border-white/20 bg-white/10 text-white"
+                                    : "border-brand-coral-200 bg-white text-brand-coral-600"
+                                )}
+                              >
+                                <Sparkle weight="fill" className="text-[11px]" />
+                                직영
+                              </span>
+                            ) : null}
+                          </div>
+                          <strong className="text-sm font-black tracking-tight">
+                            {store.displayName}
+                          </strong>
+                        </div>
                         <div
                           className={clsx(
-                            "flex w-full items-start gap-2 rounded-2xl border px-3 py-3",
+                            "flex h-10 min-w-[44px] items-center justify-center rounded-xl border px-3 transition-all duration-200",
                             isActive
-                              ? "border-white/10 bg-white/8"
+                              ? "border-white/20 bg-white/10 text-white"
                               : store.isDirect
-                                ? "border-brand-coral-100 bg-brand-coral-50/55"
-                                : "border-slate-100 bg-slate-50"
+                                ? "border-brand-coral-200 bg-white text-brand-coral-500"
+                                : "border-slate-200 bg-slate-50 text-slate-700"
                           )}
                         >
-                          <MapPin
-                            weight="fill"
-                            className={clsx(
-                              "mt-0.5 shrink-0 text-sm",
-                              isActive ? "text-brand-coral-200" : "text-slate-400"
-                            )}
-                          />
+                          <MapPin weight="fill" className="text-base" />
+                        </div>
+                      </div>
+
+                      <div
+                        className={clsx(
+                          "flex w-full items-start gap-3 rounded-2xl border px-3 py-3",
+                          isActive
+                            ? "border-white/10 bg-white/8"
+                            : store.isDirect
+                              ? "border-brand-coral-100 bg-brand-coral-50/55"
+                              : "border-slate-100 bg-slate-50"
+                        )}
+                      >
+                        <MapPin
+                          weight="fill"
+                          className={clsx(
+                            "mt-0.5 shrink-0 text-sm",
+                            isActive ? "text-brand-coral-200" : "text-slate-400"
+                          )}
+                        />
+                        <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
                           <p
                             className={clsx(
                               "text-xs font-medium leading-relaxed",
@@ -646,19 +765,48 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                           >
                             {store.address}
                           </p>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleCopyAddress(store.id, store.address);
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                handleCopyAddress(store.id, store.address);
+                              }
+                            }}
+                            className={clsx(
+                              "mt-0.5 inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold transition-all duration-200",
+                              copiedStoreId === store.id
+                                ? isActive
+                                  ? "border-white/20 bg-white/12 text-white"
+                                  : "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                : isActive
+                                  ? "border-white/10 bg-white/6 text-slate-100 hover:bg-white/12"
+                                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-400 hover:text-slate-800"
+                            )}
+                            aria-label={`${store.displayName} 주소 복사`}
+                          >
+                            <Copy className="text-[10px]" weight="bold" />
+                            {copiedStoreId === store.id ? "복사됨" : "복사"}
+                          </span>
                         </div>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white px-5 py-8 text-center">
-                    <p className="text-sm font-bold text-slate-800">검색 결과가 없어요</p>
-                    <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">
-                      다른 지역명이나 업체명으로 다시 찾아보세요.
-                    </p>
-                  </div>
-                )}
-              </div>
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white px-5 py-8 text-center">
+                  <p className="text-sm font-bold text-slate-800">검색 결과가 없어요</p>
+                  <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">
+                    다른 지역명이나 업체명으로 다시 찾아보세요.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
