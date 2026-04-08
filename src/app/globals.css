@@ -1,26 +1,37 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-brand-coral-400: #ff8585;
+  --color-brand-coral-500: #ff6b6b;
+  --color-brand-coral-600: #fa5252;
+  
+  --color-brand-surface: #ffffff;
+  --color-brand-text: #1e293b; /* slate-800 */
+  --color-brand-text-muted: #64748b; /* slate-500 */
+  --color-brand-border: #e2e8f0; /* slate-200 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-brand-surface);
+    --foreground: var(--color-brand-text);
   }
 }
 
 body {
-  background: var(--background);
+  background-color: #f3f4f6; /* PC Light Gray background */
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar for the mobile view container */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
