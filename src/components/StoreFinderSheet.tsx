@@ -9,6 +9,8 @@ import storeLocations from "@/data/storeLocations.json";
 import { trackEvent } from "@/lib/analytics";
 
 type StoreFinderSheetProps = {
+  accentColor?: string;
+  analyticsPageId?: string;
   onClose: () => void;
 };
 
@@ -93,7 +95,7 @@ const ALL_CATEGORY = "전체";
 const MAP_CENTER = { lat: 36.35, lng: 127.82 };
 const SELECTED_STORE_MAP_LEVEL = 4;
 const DIRECT_STORE_KEYWORDS = ["요미독", "요미캣", "사랑해주오", "치료해주오"];
-const DIRECT_MARKER_COLOR = "#FF6B6B";
+const DEFAULT_DIRECT_MARKER_COLOR = "#FF6B6B";
 const CATEGORY_MARKER_COLORS: Record<StoreCategory, string> = {
   병원: "#4F8BFF",
   펫샵: "#F59E0B",
@@ -176,7 +178,11 @@ function createMarkerImage(kakao: KakaoMaps, markerColor: string, isActive: bool
   );
 }
 
-export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
+export default function StoreFinderSheet({
+  accentColor = DEFAULT_DIRECT_MARKER_COLOR,
+  analyticsPageId,
+  onClose,
+}: StoreFinderSheetProps) {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
   const storeLocationItems = storeLocations as StoreLocation[];
   const mapRef = useRef<KakaoMapInstance | null>(null);
@@ -251,13 +257,15 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     }
 
     trackEvent("store_select", {
+      page: analyticsPageId,
+      brand_page: analyticsPageId,
       source,
       store_name: store.displayName,
       store_category: store.category,
       store_categories: store.displayCategories.join(","),
       is_direct: store.isDirect ? "true" : "false",
     });
-  }, []);
+  }, [analyticsPageId]);
 
   useEffect(() => {
     if (!appKey || !scriptReady || !mapContainerRef.current || mapRef.current) {
@@ -309,9 +317,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
 
     filteredStores.forEach((store) => {
       const position = new maps.LatLng(store.lat, store.lng);
-      const markerColor = store.isDirect
-        ? DIRECT_MARKER_COLOR
-        : CATEGORY_MARKER_COLORS[store.category];
+      const markerColor = store.isDirect ? accentColor : CATEGORY_MARKER_COLORS[store.category];
       const marker = new maps.Marker({
         map,
         position,
@@ -336,7 +342,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
       }
       return;
     }
-  }, [activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore, handleStoreSelect, showDirectOnly]);
+  }, [accentColor, activeCategory, mapReady, normalizedQuery, filteredStores, selectedStore, handleStoreSelect, showDirectOnly]);
 
   useEffect(() => {
     const kakao = (window as KakaoWindow).kakao;
@@ -364,6 +370,8 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     const timeout = window.setTimeout(() => {
       lastSearchSignatureRef.current = signature;
       trackEvent("store_search", {
+        page: analyticsPageId,
+        brand_page: analyticsPageId,
         active_category: activeCategory,
         direct_only: showDirectOnly ? 'true' : 'false',
         query_length: normalizedQuery.length,
@@ -373,10 +381,12 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, [activeCategory, filteredStores.length, normalizedQuery, showDirectOnly]);
+  }, [activeCategory, analyticsPageId, filteredStores.length, normalizedQuery, showDirectOnly]);
 
   const handleLocateMe = () => {
     trackEvent("locate_me_click", {
+      page: analyticsPageId,
+      brand_page: analyticsPageId,
       source: "store_finder_map",
     });
 
@@ -427,6 +437,8 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
       await navigator.clipboard.writeText(address);
       setCopiedStoreId(storeId);
       trackEvent("store_address_copy", {
+        page: analyticsPageId,
+        brand_page: analyticsPageId,
         store_id: storeId,
       });
       window.setTimeout(() => {
@@ -522,7 +534,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                   ) : null}
                 </>
               ) : (
-                <div className="flex h-[34vh] min-h-[240px] w-full flex-col items-start justify-center gap-2 bg-[linear-gradient(135deg,#fff8f2_0%,#fff1eb_100%)] px-5">
+                <div className="flex h-[34vh] min-h-[240px] w-full flex-col items-start justify-center gap-2 bg-[linear-gradient(135deg,var(--color-brand-coral-50)_0%,var(--color-brand-coral-100)_100%)] px-5">
                   <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-brand-coral-500">
                     Kakao Map
                   </span>
@@ -549,13 +561,15 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                     const nextValue = !showDirectOnly;
                     setShowDirectOnly(nextValue);
                     trackEvent("store_filter_select", {
+                      page: analyticsPageId,
+                      brand_page: analyticsPageId,
                       category: nextValue ? "직영만" : "전체",
                     });
                   }}
                   className={clsx(
                     "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-black tracking-[0.12em] shadow-[2px_2px_0px_0px_rgba(30,41,59,0.08)] transition-all duration-200 hover:-translate-y-0.5",
                     showDirectOnly
-                      ? "border-brand-coral-500 bg-[linear-gradient(135deg,#ff7f7f_0%,#ff6b6b_100%)] text-white shadow-[3px_3px_0px_0px_rgba(255,107,107,0.22)]"
+                      ? "border-brand-coral-500 bg-[linear-gradient(135deg,var(--color-brand-coral-400)_0%,var(--color-brand-coral-500)_100%)] text-white shadow-[3px_3px_0px_0px_var(--link-accent-shadow-soft)]"
                       : "border-brand-coral-200 bg-white text-brand-coral-600 hover:border-brand-coral-500 hover:bg-brand-coral-50 hover:text-brand-coral-700"
                   )}
                 >
@@ -579,6 +593,8 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                     onClick={() => {
                       setActiveCategory(category);
                       trackEvent("store_filter_select", {
+                        page: analyticsPageId,
+                        brand_page: analyticsPageId,
                         category,
                       });
                     }}
@@ -586,7 +602,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                       "shrink-0 rounded-full border-2 px-4 py-2 text-xs font-bold tracking-tight transition-all duration-200",
                       category === ALL_CATEGORY &&
                         (isActive
-                          ? "border-slate-900 bg-slate-900 text-white shadow-[2px_2px_0px_0px_rgba(255,107,107,0.65)]"
+                          ? "border-slate-900 bg-slate-900 text-white shadow-[2px_2px_0px_0px_var(--link-accent-shadow-solid)]"
                           : "border-slate-200 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"),
                       category !== ALL_CATEGORY && (isActive ? style?.active : style?.idle)
                     )}
@@ -602,7 +618,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                 className={clsx(
                   "relative overflow-hidden rounded-2xl border-2 p-4 shadow-[4px_4px_0px_0px_rgba(30,41,59,0.08)]",
                   selectedStore.isDirect
-                    ? "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_rgba(255,107,107,0.38)]"
+                    ? "border-brand-coral-500 bg-[linear-gradient(135deg,#1f2937_0%,#111827_68%,#0f172a_100%)] text-white shadow-[4px_4px_0px_0px_var(--link-accent-shadow-strong)]"
                     : "border-slate-900 bg-slate-900 text-white"
                 )}
               >
@@ -694,7 +710,7 @@ export default function StoreFinderSheet({ onClose }: StoreFinderSheetProps) {
                       className={clsx(
                         "relative flex w-full scroll-mt-4 flex-col items-start gap-3 overflow-hidden rounded-2xl border-2 p-4 text-left transition-all duration-200 active:scale-[0.98]",
                         store.isDirect
-                          ? "border-brand-coral-200 bg-[linear-gradient(135deg,#fff8f2_0%,#ffffff_68%)] text-slate-900 shadow-[3px_3px_0px_0px_rgba(255,107,107,0.16)] hover:-translate-y-0.5 hover:border-brand-coral-500 hover:shadow-[5px_5px_0px_0px_rgba(255,107,107,0.22)]"
+                          ? "border-brand-coral-200 bg-[linear-gradient(135deg,var(--color-brand-coral-50)_0%,#ffffff_68%)] text-slate-900 shadow-[3px_3px_0px_0px_var(--link-accent-shadow-subtle)] hover:-translate-y-0.5 hover:border-brand-coral-500 hover:shadow-[5px_5px_0px_0px_var(--link-accent-shadow-soft)]"
                           : "border-slate-200 bg-white text-slate-900 hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)]"
                       )}
                     >

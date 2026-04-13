@@ -3,8 +3,8 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "펫푸드주오 | PETFOOD JUO",
-  description: "엄마의 마음으로 만드는 수제 펫푸드. 휴먼그레이드 HACCP 인증. 당일생산 익일배송.",
+  title: "주오 링크인바이오",
+  description: "주오 브랜드의 공식 링크인바이오입니다.",
 };
 
 export default function RootLayout({

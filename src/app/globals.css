@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
 @theme {
+  --color-brand-coral-50: #fff8f2;
+  --color-brand-coral-100: #fff1eb;
+  --color-brand-coral-200: #ffd2d2;
+  --color-brand-coral-300: #ffaaaa;
   --color-brand-coral-400: #ff8585;
   --color-brand-coral-500: #ff6b6b;
   --color-brand-coral-600: #fa5252;
+  --color-brand-coral-700: #e03131;
   
   --color-brand-surface: #ffffff;
   --color-brand-text: #1e293b; /* slate-800 */

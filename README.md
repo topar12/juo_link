@@ -1,14 +1,15 @@
 # 주오 링크인바이오 웹
 
 주오 브랜드용 모바일 링크인바이오 페이지입니다.  
-Next.js App Router 기반으로 구성되어 있으며, 추천 상품, 이벤트, 브랜드 네트워크, 매장 찾기 기능을 포함합니다.
+Next.js App Router 기반으로 구성되어 있으며, 브랜드별 링크인바이오를 같은 템플릿과 데이터 구조로 관리합니다.
 
 ## 주요 기능
 
-- 추천 상품 카드와 공식몰 CTA
-- 멍BTI 이벤트 카드
-- Juo Company 계열사 카드
-- 카카오맵 기반 매장 찾기 시트
+- `/petfoodjuo` 펫푸드주오 링크인바이오
+- `/lovejuo` 사랑해주오 리호밍센터 링크인바이오
+- `/`에서 `/petfoodjuo`로 자동 이동
+- 브랜드별 추천 CTA, 안내 섹션, 소셜 링크
+- 펫푸드주오 카카오맵 기반 매장 찾기 시트
 - 카테고리 필터와 검색
 - 직영 매장 우선 노출 및 직영 배지 표시
 
@@ -28,7 +29,10 @@ npm install
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000) 을 열면 확인할 수 있습니다.
+브라우저에서 아래 주소를 열면 확인할 수 있습니다.
+
+- [http://localhost:3000/petfoodjuo](http://localhost:3000/petfoodjuo)
+- [http://localhost:3000/lovejuo](http://localhost:3000/lovejuo)
 
 ## 환경 변수
 
@@ -48,6 +52,8 @@ NEXT_PUBLIC_KAKAO_MAP_APP_KEY=YOUR_KAKAO_JAVASCRIPT_KEY
 ```text
 src/
   app/
+    [brand]/
+      page.tsx
     layout.tsx
     page.tsx
     globals.css
@@ -56,10 +62,27 @@ src/
     IntroAnimation.tsx
     StoreFinderSheet.tsx
   data/
+    linkPages/
+      index.ts
+      loveJuo.ts
+      petfoodJuo.ts
+      types.ts
     storeLocations.json
+  features/
+    linkinbio/
+      LinkInBioPage.tsx
 public/
   images/
 ```
+
+## 링크인바이오 데이터 수정
+
+브랜드별 문구, 버튼, 링크는 아래 파일에서 관리합니다.
+
+- [`src/data/linkPages/petfoodJuo.ts`](./src/data/linkPages/petfoodJuo.ts)
+- [`src/data/linkPages/loveJuo.ts`](./src/data/linkPages/loveJuo.ts)
+
+새 브랜드를 추가할 때는 `src/data/linkPages/index.ts`에 슬러그와 데이터 파일을 연결하면 됩니다.
 
 ## 매장 데이터 수정
 
