@@ -75,7 +75,7 @@ export default function IntroAnimation({
           }}
           durationInFrames={INTRO_DURATION_IN_FRAMES}
           compositionWidth={430}
-          compositionHeight={932}
+          compositionHeight={850}
           fps={INTRO_FPS}
           style={{
             width: "100%",
