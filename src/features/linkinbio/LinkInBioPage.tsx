@@ -227,6 +227,7 @@ export default function LinkInBioPage({ config }: LinkInBioPageProps) {
               handleUniverseCardClick,
               handleUniverseCardLinkClick,
               onCenterMapToggle: config.centerLocations?.length ? () => setShowCenterMap(true) : undefined,
+              analyticsPageId: config.analyticsPageId,
             })
           )}
 
@@ -281,6 +282,7 @@ function renderSection({
   handleUniverseCardClick,
   handleUniverseCardLinkClick,
   onCenterMapToggle,
+  analyticsPageId,
 }: {
   section: LinkPageSection;
   activeProductTabs: Record<string, string>;
@@ -295,6 +297,7 @@ function renderSection({
   handleUniverseCardClick: (card: UniverseCardConfig) => void;
   handleUniverseCardLinkClick: (card: UniverseCardConfig, link: UniverseCardLink) => void;
   onCenterMapToggle?: () => void;
+  analyticsPageId: string;
 }) {
   switch (section.type) {
     case "productTabs":
@@ -305,6 +308,7 @@ function renderSection({
           activeProductTabs={activeProductTabs}
           setActiveProductTabs={setActiveProductTabs}
           handleTrackedClick={handleTrackedClick}
+          analyticsPageId={analyticsPageId}
         />
       );
     case "featureCards":
@@ -377,6 +381,7 @@ function ProductTabs({
   activeProductTabs,
   setActiveProductTabs,
   handleTrackedClick,
+  analyticsPageId,
 }: {
   section: ProductTabsSection;
   activeProductTabs: Record<string, string>;
@@ -386,6 +391,7 @@ function ProductTabs({
     fallbackEvent: string,
     fallbackParams?: Record<string, string | number>
   ) => void;
+  analyticsPageId: string;
 }) {
   const activeTabId = activeProductTabs[section.id] ?? section.tabs[0]?.id;
   const activeTab = section.tabs.find((tab) => tab.id === activeTabId) ?? section.tabs[0];
@@ -399,12 +405,18 @@ function ProductTabs({
             <button
               key={tab.id}
               type="button"
-              onClick={() =>
+              onClick={() => {
                 setActiveProductTabs((current) => ({
                   ...current,
                   [section.id]: tab.id,
-                }))
-              }
+                }));
+                trackEvent("product_tab_change", {
+                  page: analyticsPageId,
+                  brand_page: analyticsPageId,
+                  tab_id: tab.id,
+                  tab_label: tab.label,
+                });
+              }}
               className={clsx(
                 "rounded-md px-4 py-1.5 text-xs font-bold transition-all",
                 activeTab?.id === tab.id
@@ -426,7 +438,7 @@ function ProductTabs({
         className="grid grid-cols-2 gap-3"
       >
         {activeTab?.products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} analyticsPageId={analyticsPageId} tabId={activeTab.id} />
         ))}
       </motion.div>
 
@@ -692,12 +704,21 @@ function ActionButton({
   return <SmartLink href={href} className={className} onClick={onClick}>{content}</SmartLink>;
 }
 
-function ProductCard({ product }: { product: ProductItem }) {
+function ProductCard({ product, analyticsPageId, tabId }: { product: ProductItem; analyticsPageId: string; tabId: string }) {
   return (
     <a
       href={product.href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() =>
+        trackEvent("product_click", {
+          page: analyticsPageId,
+          brand_page: analyticsPageId,
+          product_id: product.id,
+          product_title: product.title,
+          tab_id: tabId,
+        })
+      }
       className="group relative flex flex-col rounded-xl border-2 border-slate-200 bg-white p-3 text-left shadow-[2px_2px_0px_0px_rgba(30,41,59,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-800 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.15)] active:scale-95"
     >
       <div

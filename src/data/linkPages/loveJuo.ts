@@ -102,41 +102,6 @@ export const loveJuoPage: LinkPageConfig = {
       ],
     },
     {
-      id: "care-message",
-      type: "featureCards",
-      title: "처음 만나는 사랑해주오",
-      cards: [
-        {
-          id: "rehoming-intro",
-          badge: "Re-homing",
-          title: "다시 가족이 되는 길",
-          description: "사랑해주오는 아이의 오늘을 지키고, 오래 함께할 가족을 만나는 과정을 차분히 이어갑니다.",
-          imageSrc: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1200&q=80",
-          imageAlt: "함께 앉아 있는 강아지와 고양이",
-          href: rehomingHomepageUrl,
-        },
-      ],
-    },
-    {
-      id: "process",
-      type: "process",
-      title: "입양은 이렇게 진행돼요",
-      steps: [
-        {
-          title: "상담 신청",
-          description: "가족 구성, 생활 환경, 돌봄 시간을 함께 확인합니다.",
-        },
-        {
-          title: "아이와 만남",
-          description: "성향과 생활 패턴이 잘 맞는지 충분히 만나봅니다.",
-        },
-        {
-          title: "가족 결정",
-          description: "입양 후에도 필요한 안내와 케어를 이어갑니다.",
-        },
-      ],
-    },
-    {
       id: "checklist",
       type: "checklist",
       title: "입양 전 꼭 확인해주세요",
@@ -153,12 +118,28 @@ export const loveJuoPage: LinkPageConfig = {
       title: "자주 묻는 질문",
       items: [
         {
-          question: "방문 상담이 필요한가요?",
-          answer: "아이의 성향과 가족의 생활 환경을 함께 확인하기 위해 상담 절차를 권장합니다.",
+          question: "입양비용이 있나요?",
+          answer: "사랑해주오 리호밍센터는 입양비용이 필요하지 않습니다. 정확한 절차와 시스템으로 준비된 보호자에게 입양의 기회를 제공하는 \"선진국형 입양센터\" 입니다.",
         },
         {
-          question: "상담 전에 무엇을 준비하면 좋나요?",
-          answer: "가족 구성, 생활 환경, 하루 돌봄 시간처럼 아이와 함께할 일상을 미리 생각해두면 좋습니다.",
+          question: "입양절차는 어떻게 되나요?",
+          answer: "리호밍 센터에 방문하여 입양을 기다리는 아이들을 만나보실 수 있습니다. 교감을 거쳐 입양결정 후 입양교육, 건강검진, 방문훈련 등 다양한 절차가 있습니다.",
+        },
+        {
+          question: "입양 자격 조건이 있나요?",
+          answer: "만 19세 이상의 성인이면 누구나 신청할 수 있습니다. 입양 교육 이수, 안정적인 주거 환경, 가족 구성원 전원 동의가 필요합니다. 반려동물 양육 경험이 없어도 괜찮습니다.",
+        },
+        {
+          question: "센터 운영시간은 어떻게 되나요?",
+          answer: "리호밍센터는 연중무휴로 오전 10시부터 오후 10시까지 운영합니다. 방문 전 전화 문의를 권장드립니다.",
+        },
+        {
+          question: "센터 방문 시 예약이 필요한가요?",
+          answer: "예약 없이 방문 가능하지만, 원활한 상담을 위해 사전 예약을 권장합니다. 전화, 카카오톡, 사이트 내 채팅상담을 통해 예약하실 수 있습니다.",
+        },
+        {
+          question: "센터 위치는 어디인가요?",
+          answer: "인천점(인천광역시 남동구 논현로46번길 22, B동 1층 105호)과 광명점(경기도 광명시 금하로 464, 2층 207호) 두 곳을 운영하고 있습니다.",
         },
       ],
     },
