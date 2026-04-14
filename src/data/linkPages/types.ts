@@ -42,6 +42,7 @@ export type LinkAction = {
   icon: IconKey;
   href?: string;
   notice?: string;
+  confirmMessage?: string;
   toggleCenterMap?: true;
   tracking?: TrackingConfig;
 };

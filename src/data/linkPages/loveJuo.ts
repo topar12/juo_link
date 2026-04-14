@@ -63,7 +63,8 @@ export const loveJuoPage: LinkPageConfig = {
           eyebrow: "Adoption",
           label: "입양 상담하기",
           description: "평생 가족이 되어줄 준비가 되셨다면 상담부터 시작해주세요.",
-          href: rehomingKakaoUrl,
+          href: "tel:050-7959-9735",
+          confirmMessage: "리호밍센터(050-7959-9735)로\n전화를 연결할까요?",
           tracking: {
             event: "lovejuo_action_click",
             params: {

@@ -818,8 +818,17 @@ function IntentAction({
       : "border-slate-200 bg-white text-slate-900 shadow-[3px_3px_0px_0px_rgba(30,41,59,0.06)] hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)]"
   );
 
+  const handleClick = action.confirmMessage
+    ? () => {
+        onClick();
+        if (window.confirm(action.confirmMessage)) {
+          window.location.href = action.href!;
+        }
+      }
+    : onClick;
+
   return (
-    <SmartLink href={action.href} className={className} onClick={onClick}>
+    <SmartLink href={action.confirmMessage ? undefined : action.href} className={className} onClick={handleClick}>
       <div
         className={clsx(
           "flex h-12 min-w-12 items-center justify-center rounded-xl border-2 text-2xl transition-colors",
