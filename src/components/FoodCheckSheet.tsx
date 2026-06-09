@@ -98,6 +98,7 @@ export default function FoodCheckSheet({ analyticsPageId, onClose }: FoodCheckSh
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              aria-label="음식 검색"
               placeholder="예: 초콜릿, 사과, 양파"
               className="h-12 w-full rounded-2xl border-2 border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-coral-500"
             />
@@ -111,6 +112,7 @@ export default function FoodCheckSheet({ analyticsPageId, onClose }: FoodCheckSh
                 <button
                   key={option}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() => setActiveVerdict(option)}
                   className={clsx(
                     "shrink-0 rounded-full border-2 px-4 py-2 text-xs font-bold tracking-tight transition-all duration-200",
