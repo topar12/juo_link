@@ -224,9 +224,9 @@ export default function LinkInBioPage({ config }: LinkInBioPageProps) {
       {!showIntro && (
         <motion.div
           key="main"
-          initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="relative z-10 flex h-full w-full flex-col gap-10 overflow-y-auto bg-slate-50 px-5 py-10 pb-16 no-scrollbar"
         >
           <HeroSection config={config} />

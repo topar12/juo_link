@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef } from "react";
-import { Player } from "@remotion/player";
-import { motion } from "framer-motion";
-import {
-  INTRO_DURATION_IN_FRAMES,
-  INTRO_FPS,
-  IntroComposition,
-  type IntroVariantId,
-} from "@/features/linkinbio/intro/IntroComposition";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+
+// 단어 인트로 타이밍 (Remotion Player 제거 후 경량 버전)
+const WORD_HOLD_MS = 950; // 단어당 노출 시간
+const WORD_MOTION_S = 0.45; // 단어 진입/퇴장 트랜지션
+const COMPLETE_BUFFER_MS = 350; // 마지막 단어 후 여유
 
 type IntroAnimationProps = {
   words?: string[];
   accentWordIndex?: number;
-  variant?: IntroVariantId;
+  /** 현재 경로에선 미사용 (실험용 변형은 intro-preview 전용). 호환을 위해 유지. */
+  variant?: string;
   backgroundVideoSrc?: string;
   videoDurationMs?: number;
   videoStartFromEndMs?: number;
@@ -25,7 +24,6 @@ type IntroAnimationProps = {
 export default function IntroAnimation({
   words = ["FRESH.", "HUMAN GRADE.", "PETFOOD JUO."],
   accentWordIndex = 2,
-  variant = "wordRise",
   backgroundVideoSrc,
   videoDurationMs = 5000,
   videoStartFromEndMs,
@@ -45,14 +43,15 @@ export default function IntroAnimation({
   }, [onComplete]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      completeIntro();
-    }, backgroundVideoSrc ? videoDurationMs + 120 : (INTRO_DURATION_IN_FRAMES / INTRO_FPS) * 1000 + 100);
+    const durationMs = backgroundVideoSrc
+      ? videoDurationMs + 120
+      : words.length * WORD_HOLD_MS + COMPLETE_BUFFER_MS;
+    const timer = setTimeout(completeIntro, durationMs);
     return () => clearTimeout(timer);
-  }, [backgroundVideoSrc, completeIntro, videoDurationMs]);
+  }, [backgroundVideoSrc, completeIntro, videoDurationMs, words.length]);
 
   return (
-    <motion.div 
+    <motion.div
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
       className="absolute inset-0 z-50 overflow-hidden bg-slate-950"
@@ -66,25 +65,7 @@ export default function IntroAnimation({
           onEnded={completeIntro}
         />
       ) : (
-        <Player
-          component={IntroComposition}
-          inputProps={{
-            words,
-            accentWordIndex,
-            variant,
-          }}
-          durationInFrames={INTRO_DURATION_IN_FRAMES}
-          compositionWidth={430}
-          compositionHeight={850}
-          fps={INTRO_FPS}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-          autoPlay
-          controls={false}
-          acknowledgeRemotionLicense
-        />
+        <WordRiseIntro words={words} accentWordIndex={accentWordIndex} />
       )}
       <button
         type="button"
@@ -94,6 +75,50 @@ export default function IntroAnimation({
         Skip
       </button>
     </motion.div>
+  );
+}
+
+function WordRiseIntro({
+  words,
+  accentWordIndex,
+}: {
+  words: string[];
+  accentWordIndex: number;
+}) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (index >= words.length - 1) {
+      return; // 마지막 단어에서 정지 (완료는 부모 타이머가 처리)
+    }
+    const timer = setTimeout(() => setIndex((value) => value + 1), WORD_HOLD_MS);
+    return () => clearTimeout(timer);
+  }, [index, words.length]);
+
+  const isAccent = index === accentWordIndex;
+
+  return (
+    <div className="relative h-full w-full bg-slate-50">
+      <AnimatePresence>
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ duration: WORD_MOTION_S, ease: "easeOut" }}
+          style={{ willChange: "transform, opacity" }}
+          className="absolute inset-0 flex items-center justify-center p-8"
+        >
+          <span
+            className={`text-center text-[44px] font-black uppercase leading-none tracking-tighter sm:text-5xl ${
+              isAccent ? "text-brand-coral-500" : "text-slate-900"
+            }`}
+          >
+            {words[index]}
+          </span>
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
 
