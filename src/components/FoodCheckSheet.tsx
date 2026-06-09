@@ -170,6 +170,9 @@ export default function FoodCheckSheet({ analyticsPageId, onClose }: FoodCheckSh
             )}
           </div>
 
+        </div>
+
+        <div className="sticky bottom-0 mt-auto border-t-2 border-slate-200 bg-slate-50/95 px-5 py-3 backdrop-blur-sm">
           <a
             href={LOOPBACK_URL}
             target="_blank"
@@ -180,12 +183,12 @@ export default function FoodCheckSheet({ analyticsPageId, onClose }: FoodCheckSh
                 brand_page: analyticsPageId,
               })
             }
-            className="mt-2 flex items-center justify-between rounded-2xl border-2 border-brand-coral-200 bg-brand-coral-50/50 px-5 py-4 text-sm font-bold text-slate-900 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-coral-500"
+            className="flex items-center justify-between rounded-2xl border-2 border-brand-coral-200 bg-brand-coral-50 px-5 py-3.5 text-sm font-bold text-slate-900 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-coral-500"
           >
             <span>안심하고 줄 수 있는 간식 보기</span>
             <span className="text-base leading-none">&rarr;</span>
           </a>
-          <p className="px-1 text-[11px] font-medium leading-relaxed text-slate-400">참고용 정보이며, 우리 아이 상태·기저질환에 따라 다를 수 있어요.</p>
+          <p className="mt-2 text-center text-[10px] font-medium leading-relaxed text-slate-400">참고용 정보이며, 우리 아이 상태·기저질환에 따라 다를 수 있어요.</p>
         </div>
       </div>
     </motion.div>
