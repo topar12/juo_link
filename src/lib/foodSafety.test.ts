@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { searchFoods, VERDICT_META, type FoodSafetyItem } from "./foodSafety";
+import { searchFoods, VERDICT_META, VERDICT_FILTER_ORDER, type FoodSafetyItem } from "./foodSafety";
 
 const FIXTURE: FoodSafetyItem[] = [
   { id: "chocolate", name: "초콜릿", aliases: ["초콜렛", "choco"], verdict: "danger", reason: "테오브로민 중독." },
@@ -24,6 +24,12 @@ describe("searchFoods", () => {
   it("매칭 없으면 빈 배열", () => {
     expect(searchFoods(FIXTURE, "양파", "all")).toEqual([]);
   });
+  it("대소문자 무시", () => {
+    expect(searchFoods(FIXTURE, "CHOCO", "all").map((f) => f.id)).toEqual(["chocolate"]);
+  });
+  it("앞뒤 공백 무시", () => {
+    expect(searchFoods(FIXTURE, "  초콜  ", "all").map((f) => f.id)).toEqual(["chocolate"]);
+  });
 });
 
 describe("VERDICT_META", () => {
@@ -31,5 +37,11 @@ describe("VERDICT_META", () => {
     expect(VERDICT_META.danger.label).toBe("안 돼요");
     expect(VERDICT_META.caution.label).toBe("조심해요");
     expect(VERDICT_META.safe.label).toBe("먹어도 돼요");
+  });
+});
+
+describe("VERDICT_FILTER_ORDER", () => {
+  it("위험한 것부터 순서", () => {
+    expect(VERDICT_FILTER_ORDER).toEqual(["danger", "caution", "safe"]);
   });
 });
