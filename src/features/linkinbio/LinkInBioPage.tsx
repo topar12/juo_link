@@ -11,6 +11,7 @@ import {
   Heart,
   HouseLine,
   InstagramLogo,
+  MagnifyingGlass,
   MapPin,
   NewspaperClipping,
   Scissors,
@@ -25,6 +26,7 @@ import clsx from "clsx";
 import CenterMapSheet from "@/components/CenterMapSheet";
 import IntroAnimation from "@/components/IntroAnimation";
 import StoreFinderSheet from "@/components/StoreFinderSheet";
+import FoodCheckSheet from "@/components/FoodCheckSheet";
 import { trackEvent, trackLinkInBioPageView } from "@/lib/analytics";
 import type {
   ActionGridSection,
@@ -49,6 +51,7 @@ const ICONS = {
   cart: ShoppingCart,
   crown: Crown,
   map: MapPin,
+  search: MagnifyingGlass,
   store: Storefront,
   firstAid: FirstAid,
   scissors: Scissors,
@@ -109,6 +112,7 @@ export default function LinkInBioPage({ config }: LinkInBioPageProps) {
   const [showIntro, setShowIntro] = useState(true);
   const [activeProductTabs, setActiveProductTabs] = useState<Record<string, string>>({});
   const [showStoreFinder, setShowStoreFinder] = useState(false);
+  const [showFoodCheck, setShowFoodCheck] = useState(false);
   const [showCenterMap, setShowCenterMap] = useState(false);
   const pageViewTrackedRef = useRef(false);
   const accentTheme = config.theme?.accent ?? DEFAULT_ACCENT_THEME;
@@ -159,6 +163,15 @@ export default function LinkInBioPage({ config }: LinkInBioPageProps) {
       location: config.storeFinder.trackingLocation,
     });
     setShowStoreFinder(true);
+  };
+
+  const handleFoodCheckOpen = () => {
+    trackEvent("food_check_open", {
+      page: config.analyticsPageId,
+      brand_page: config.analyticsPageId,
+      location: "pet_tools_section",
+    });
+    setShowFoodCheck(true);
   };
 
   const handleUniverseCardClick = (card: UniverseCardConfig) => {
@@ -227,6 +240,7 @@ export default function LinkInBioPage({ config }: LinkInBioPageProps) {
               handleUniverseCardClick,
               handleUniverseCardLinkClick,
               onCenterMapToggle: config.centerLocations?.length ? () => setShowCenterMap(true) : undefined,
+              onOpenFoodCheck: handleFoodCheckOpen,
               analyticsPageId: config.analyticsPageId,
             })
           )}
@@ -263,6 +277,15 @@ export default function LinkInBioPage({ config }: LinkInBioPageProps) {
       </AnimatePresence>
 
       <AnimatePresence>
+        {showFoodCheck ? (
+          <FoodCheckSheet
+            analyticsPageId={config.analyticsPageId}
+            onClose={() => setShowFoodCheck(false)}
+          />
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {showCenterMap && config.centerLocations?.length ? (
           <CenterMapSheet
             locations={config.centerLocations}
@@ -282,6 +305,7 @@ function renderSection({
   handleUniverseCardClick,
   handleUniverseCardLinkClick,
   onCenterMapToggle,
+  onOpenFoodCheck,
   analyticsPageId,
 }: {
   section: LinkPageSection;
@@ -297,6 +321,7 @@ function renderSection({
   handleUniverseCardClick: (card: UniverseCardConfig) => void;
   handleUniverseCardLinkClick: (card: UniverseCardConfig, link: UniverseCardLink) => void;
   onCenterMapToggle?: () => void;
+  onOpenFoodCheck?: () => void;
   analyticsPageId: string;
 }) {
   switch (section.type) {
@@ -317,6 +342,7 @@ function renderSection({
           key={section.id}
           section={section}
           handleTrackedClick={handleTrackedClick}
+          onOpenFoodCheck={onOpenFoodCheck}
         />
       );
     case "actionGrid":
@@ -461,6 +487,7 @@ function ProductTabs({
 function FeatureCards({
   section,
   handleTrackedClick,
+  onOpenFoodCheck,
 }: {
   section: FeatureCardsSection;
   handleTrackedClick: (
@@ -468,6 +495,7 @@ function FeatureCards({
     fallbackEvent: string,
     fallbackParams?: Record<string, string | number>
   ) => void;
+  onOpenFoodCheck?: () => void;
 }) {
   return (
     <section className="mt-4 flex w-full flex-col gap-3">
@@ -477,11 +505,14 @@ function FeatureCards({
           <FeatureCardButton
             key={card.id}
             card={card}
-            onClick={() =>
+            onClick={() => {
               handleTrackedClick(card, "feature_card_click", {
                 card_id: card.id,
-              })
-            }
+              });
+              if (card.opens === "foodCheck") {
+                onOpenFoodCheck?.();
+              }
+            }}
           />
         ))}
       </div>
