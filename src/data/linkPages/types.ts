@@ -17,7 +17,8 @@ export type IconKey =
   | "instagram"
   | "kakao"
   | "blog"
-  | "sparkle";
+  | "sparkle"
+  | "search";
 
 export type TrackingConfig = {
   event: string;
@@ -114,6 +115,7 @@ export type FeatureCard = {
   icon?: IconKey;
   href?: string;
   notice?: string;
+  opens?: "foodCheck";
   tracking?: TrackingConfig;
 };
 

@@ -128,6 +128,21 @@ export const petfoodJuoPage: LinkPageConfig = {
       },
     },
     {
+      id: "pet-tools",
+      type: "featureCards",
+      title: "우리 아이 체크 도구",
+      cards: [
+        {
+          id: "food-check",
+          icon: "search",
+          badge: "무료 체크",
+          title: "우리 아이 먹어도 돼요?",
+          description: "음식 이름을 검색하면 먹어도 되는지 바로 알려드려요.",
+          opens: "foodCheck",
+        },
+      ],
+    },
+    {
       id: "events",
       type: "featureCards",
       title: "진행중인 이벤트",
