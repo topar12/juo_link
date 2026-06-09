@@ -830,7 +830,7 @@ function FeatureCardButton({
   const className =
     "group relative flex w-full flex-col gap-4 rounded-2xl border-2 border-slate-200 bg-white p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,0.12)] active:scale-[0.98]";
 
-  return <SmartLink href={card.href} className={className} onClick={onClick}>{content}</SmartLink>;
+  return <SmartLink href={card.opens ? undefined : card.href} className={className} onClick={onClick}>{content}</SmartLink>;
 }
 
 function IntentAction({
