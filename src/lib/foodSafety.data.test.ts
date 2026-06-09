@@ -21,6 +21,10 @@ describe("foodSafety.json 무결성", () => {
       expect(f.reason.length, `reason on ${f.id}`).toBeGreaterThan(0);
       expect(VALID_VERDICTS, `verdict on ${f.id}`).toContain(f.verdict);
       expect(Array.isArray(f.aliases), `aliases on ${f.id}`).toBe(true);
+      expect(f.aliases.length, `aliases non-empty on ${f.id}`).toBeGreaterThan(0);
+      for (const alias of f.aliases) {
+        expect(alias.trim().length, `alias "${alias}" on ${f.id} is blank/whitespace`).toBeGreaterThan(0);
+      }
     }
   });
 });
