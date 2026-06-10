@@ -15,9 +15,9 @@ CSBG CSBP CSTG CSTP CRBG CRBP CRTG CRTP
 - 파일이 없으면 카드·OG 모두 유형 컬러 플레이스홀더로 자동 폴백(안 깨짐).
 
 ## 생성 방법
-작업툴에 주멍이 캐릭터를 `THIS DOG CHARACTER`로 첨부하고(주냥이 카메오 컷은 `THIS CAT CHARACTER`도 함께),
-**스펙 §5의 16개 프롬프트**(`docs/superpowers/specs/2026-06-10-petbti-rebuild-design.md`)를
-유형별로 사용. 카메오 5컷: ESBG·ESBP·CSBG·CSBP·CSTG.
+**프롬프트 시트(첨부용)**: `docs/superpowers/specs/2026-06-10-petbti-jumeong-prompts.md`
+— 공통 STYLE 프리픽스 + 유형별 SCENE 16개 + 🐱 주냥이 카메오 마킹(ESBG·ESBP·CSBG·CSBP·CSTG).
+작업툴에 주멍이를 `THIS DOG CHARACTER`로(카메오 컷은 주냥이를 `THIS CAT CHARACTER`로도) 첨부해 사용.
 
 ## 드롭 후
 ```
