@@ -1,0 +1,47 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경: 부드러운 오프화이트 모서리 둥근 사각형 -->
+  <rect width="512" height="512" rx="120" fill="#F9F8F6" />
+  
+  <!-- 외부 디자인: 점선 원형 타겟/분석을 상징 (Sage 컬러) -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#8A9A86" stroke-width="8" stroke-dasharray="16 16" opacity="0.6"/>
+  
+  <!-- 왼쪽 귀 (Rose 컬러) -->
+  <path d="M 180 160 C 130 130, 80 200, 110 270 C 130 310, 170 300, 180 260 Z" fill="#D49A89" />
+  <!-- 오른쪽 귀 (Rose 컬러) -->
+  <path d="M 332 160 C 382 130, 432 200, 402 270 C 382 310, 342 300, 332 260 Z" fill="#D49A89" />
+  
+  <!-- 강아지 기본 얼굴형 (Butter 컬러) -->
+  <rect x="156" y="160" width="200" height="210" rx="90" fill="#E8D18C" />
+  
+  <!-- 입가 하이라이트/머즐 (Offwhite) -->
+  <ellipse cx="256" cy="290" rx="60" ry="45" fill="#F9F8F6" />
+  
+  <!-- 코 (Charcoal) -->
+  <path d="M 236 270 Q 256 260 276 270 Q 266 295 256 295 Q 246 295 236 270 Z" fill="#1A202C" />
+  
+  <!-- 입 (Charcoal) -->
+  <path d="M 256 295 L 256 312 
+           M 230 305 Q 243 325 256 312 
+           M 282 305 Q 269 325 256 312" 
+        fill="none" stroke="#1A202C" stroke-width="7" stroke-linecap="round" />
+  
+  <!-- 왼쪽 눈 (Charcoal) -->
+  <circle cx="210" cy="230" r="14" fill="#1A202C" />
+  <circle cx="206" cy="226" r="5" fill="#F9F8F6" />
+  
+  <!-- 오른쪽 눈 (Charcoal) -->
+  <circle cx="302" cy="230" r="14" fill="#1A202C" />
+  <circle cx="298" cy="226" r="5" fill="#F9F8F6" />
+  
+  <!-- 오른쪽 눈 - 분석 돋보기/모노클 (성향 분석기 상징, Sage 컬러) -->
+  <circle cx="302" cy="230" r="32" fill="none" stroke="#8A9A86" stroke-width="8" />
+  <line x1="326" y1="254" x2="360" y2="288" stroke="#8A9A86" stroke-width="10" stroke-linecap="round" />
+  
+  <!-- 머리 위 물음표 (Charcoal) -->
+  <path d="M 370 120 C 390 90, 430 100, 420 130 C 410 160, 380 160, 380 180" 
+        fill="none" stroke="#1A202C" stroke-width="8" stroke-linecap="round" />
+  <circle cx="380" cy="205" r="5" fill="#1A202C" />
+  
+  <!-- 반짝이 포인트 장식 (Butter 컬러) -->
+  <path d="M 120 120 Q 130 140 150 150 Q 130 160 120 180 Q 110 160 90 150 Q 110 140 120 120 Z" fill="#E8D18C" />
+</svg>
