@@ -5,12 +5,14 @@ import {
   Settings,
   ExternalLink,
   Plus,
+  Apple,
 } from 'lucide-react';
 import { PROJECTS } from '@/features/admin/lib/constants';
 
 // 호스트 앱은 admin 을 단일 클라이언트 페이지로 로드하므로 next/link·usePathname 대신
 // 상위(AdminDashboard)에서 내려주는 활성 뷰 상태/콜백으로 네비게이션을 처리한다.
-export type AdminView = 'overview' | string;
+// 'foods' = 음식 데이터 CRUD 편집기(프로젝트가 아닌 데이터 관리 뷰).
+export type AdminView = 'overview' | 'foods' | string;
 
 interface SidebarProps {
   activeView: AdminView;
@@ -89,6 +91,26 @@ export default function Sidebar({ activeView, onSelect }: SidebarProps) {
             <span className="italic">constants.ts에서 추가</span>
           </div>
         </div>
+
+        {/* Data — 코드 수정·재배포 없이 관리하는 데이터(D1) 뷰 */}
+        <p className="text-[10px] font-semibold text-[#52525B] uppercase tracking-wider px-3 pt-5 pb-2.5">
+          데이터
+        </p>
+        <button
+          type="button"
+          onClick={() => onSelect('foods')}
+          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 ${
+            activeView === 'foods'
+              ? 'bg-[#6366F1]/10 text-[#818CF8]'
+              : 'text-[#A1A1AA] hover:text-white hover:bg-[#1c1c22]'
+          }`}
+        >
+          <Apple
+            size={16}
+            className={activeView === 'foods' ? 'text-[#818CF8]' : 'text-[#52525B]'}
+          />
+          음식 데이터
+        </button>
 
         {/* Settings */}
         <p className="text-[10px] font-semibold text-[#52525B] uppercase tracking-wider px-3 pt-5 pb-2.5">

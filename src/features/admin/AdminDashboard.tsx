@@ -5,6 +5,7 @@ import { PROJECTS } from '@/features/admin/lib/constants';
 import Sidebar, { type AdminView } from '@/features/admin/components/Sidebar';
 import OverviewContent from '@/features/admin/components/OverviewContent';
 import DashboardContent from '@/features/admin/components/DashboardContent';
+import FoodsManager from '@/features/admin/components/FoodsManager';
 
 // 원본(juo_dashboard)은 Next 라우팅(/ 개요 + /projects/[projectId])으로 화면을 나눴지만,
 // 호스트 앱은 admin 을 단일 클라이언트 페이지(ssr:false)로 로드하므로 중첩 라우팅이 없다.
@@ -21,7 +22,10 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#09090B] text-white">
       <Sidebar activeView={activeView} onSelect={setActiveView} />
       <div className="ml-[240px]">
-        {activeProject ? (
+        {/* 음식 데이터 뷰는 프로젝트가 아니므로 프로젝트 조회보다 먼저 분기한다. */}
+        {activeView === 'foods' ? (
+          <FoodsManager />
+        ) : activeProject ? (
           <DashboardContent project={activeProject} />
         ) : (
           <OverviewContent onSelect={setActiveView} />

@@ -19,18 +19,74 @@ type FoodCheckSheetProps = {
   onClose: () => void;
 };
 
-const FOODS = foodSafetyData as FoodSafetyItem[];
+// 폴백 데이터 — 번들된 시드 JSON. API(/api/foods)가 실패하면 이걸 쓴다.
+// 건강·안전 데이터라 검색기가 절대 빈 화면이 되면 안 되므로 항상 보유한다.
+const FALLBACK_FOODS = foodSafetyData as FoodSafetyItem[];
 const ALL = "all" as const;
 const LOOPBACK_URL = "https://www.lovejuo.com/shop/";
 
 export default function FoodCheckSheet({ analyticsPageId, onClose }: FoodCheckSheetProps) {
   const [query, setQuery] = useState("");
   const [activeVerdict, setActiveVerdict] = useState<FoodVerdict | typeof ALL>(ALL);
+  // null = 아직 미로딩. fetch 성공 시 D1 데이터, 실패 시 폴백으로 채운다.
+  const [foods, setFoods] = useState<FoodSafetyItem[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const lastSearchSignatureRef = useRef("");
+  // 시트는 열릴 때 마운트되므로(부모가 조건부 렌더), fetch는 마운트당 1회만.
+  // StrictMode 이중 호출·재진입을 막는 가드.
+  const hasFetchedRef = useRef(false);
+
+  // 시트가 열릴 때(=마운트) /api/foods를 lazy fetch. 로딩 중에도 폴백으로
+  // 검색을 막지 않도록, 화면에 넘기는 데이터는 foods ?? FALLBACK_FOODS로 보장.
+  useEffect(() => {
+    if (hasFetchedRef.current) {
+      return;
+    }
+    hasFetchedRef.current = true;
+
+    // 언마운트 후 늦게 도착한 응답으로 상태를 갱신하지 않기 위한 가드.
+    let aborted = false;
+    setIsLoading(true);
+
+    (async () => {
+      try {
+        const res = await fetch("/api/foods");
+        // 비200(서버/D1 오류는 500)은 폴백으로 처리.
+        if (!res.ok) {
+          throw new Error(`/api/foods responded ${res.status}`);
+        }
+        const data = (await res.json()) as FoodSafetyItem[];
+        // 빈 배열은 데이터 누락으로 간주 — 안전 데이터라 폴백 사용.
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("/api/foods returned empty data");
+        }
+        if (!aborted) {
+          setFoods(data);
+        }
+      } catch {
+        // 네트워크 오류·비200·빈 응답 → 번들 폴백으로 검색기 유지.
+        if (!aborted) {
+          setFoods(FALLBACK_FOODS);
+        }
+      } finally {
+        if (!aborted) {
+          setIsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      aborted = true;
+    };
+  }, []);
 
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
-  const results = searchFoods(FOODS, normalizedQuery, activeVerdict);
+  // 로딩 첫 프레임에도 빈 화면이 없도록 폴백을 기본값으로 사용(검색 즉시 동작).
+  const items = foods ?? FALLBACK_FOODS;
+  const results = searchFoods(items, normalizedQuery, activeVerdict);
+  // 최초 로딩 중(아직 fetch 결과 미반영)에만 스켈레톤 노출.
+  const showSkeleton = isLoading && foods === null;
   const filterOptions: Array<FoodVerdict | typeof ALL> = [ALL, ...VERDICT_FILTER_ORDER];
 
   useEffect(() => {
@@ -127,10 +183,29 @@ export default function FoodCheckSheet({ analyticsPageId, onClose }: FoodCheckSh
             })}
           </div>
 
-          <p className="px-1 text-xs font-semibold text-slate-500">{results.length}개 음식</p>
+          <p className="px-1 text-xs font-semibold text-slate-500">
+            {showSkeleton ? "불러오는 중…" : `${results.length}개 음식`}
+          </p>
 
           <div className="flex flex-col gap-3">
-            {results.length > 0 ? (
+            {showSkeleton ? (
+              // 최초 로딩 스켈레톤 — 결과 카드와 동일한 토큰으로 갑작스러운 전환 방지.
+              <div aria-busy="true" aria-label="음식 데이터 불러오는 중" className="flex flex-col gap-3">
+                {[0, 1, 2].map((index) => (
+                  <div
+                    key={index}
+                    className="flex w-full items-start gap-3 overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-[3px_3px_0px_0px_rgba(30,41,59,0.06)]"
+                  >
+                    <div className="h-11 min-w-11 animate-pulse rounded-xl bg-slate-200" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
+                      <div className="h-3.5 w-1/3 animate-pulse rounded-full bg-slate-200" />
+                      <div className="h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
+                      <div className="h-3 w-3/5 animate-pulse rounded-full bg-slate-100" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : results.length > 0 ? (
               results.map((food) => {
                 const meta = VERDICT_META[food.verdict];
                 return (
