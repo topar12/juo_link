@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { resultsData } from '@/features/petbti/data/questions';
 import * as htmlToImage from 'html-to-image';
 import { InstagramLogo, CheckCircle, Copy, ArrowCounterClockwise, Sparkle, MagicWand, DownloadSimple, ArrowRight, Camera, Users, ShareNetwork, CaretDown } from '@phosphor-icons/react';
-import { incrementResultCount, getResultStats, logEvent } from '@/features/petbti/firebase';
+import { logEvent } from '@/features/petbti/firebase';
+import { incrementResultCount, getResultStats } from '@/features/petbti/stats';
 
 // resultId → Firestore typeCode 매핑
 const resultToTypeCode: Record<string, string> = {
