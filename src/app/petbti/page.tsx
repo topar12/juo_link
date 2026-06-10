@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import PetBtiApp from "@/features/petbti/PetBtiApp";
+import PetBtiClient from "./PetBtiClient";
 
 export const metadata: Metadata = {
   title: "멍-BTI 행동학 테스트 | 펫푸드 주오",
@@ -9,9 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function PetBtiPage() {
-  return (
-    <Suspense fallback={null}>
-      <PetBtiApp />
-    </Suspense>
-  );
+  return <PetBtiClient />;
 }
