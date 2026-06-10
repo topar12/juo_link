@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { PET_TYPE_CODES, PET_TYPES, type PetTypeCode } from "@/features/petbti/data/types";
 import ResultView from "@/features/petbti/components/ResultView";
 
-// 16유형 결과 퍼머링크 — SSG(빌드타임 16종) + 유형별 OG. 그 외 타입은 404.
-export const dynamicParams = false;
+// 16유형 결과 퍼머링크 — SSG(빌드타임 16종) + 유형별 OG.
+// dynamicParams=true(기본): OpenNext-Cloudflare에서 incremental cache 없이도 SSR 폴백으로
+// 프리렌더 라우트가 200 응답하게 한다(false면 프리렌더 HTML 미서빙 시 404). 비유효 코드는
+// 아래 ResultPage 의 notFound()가 404 처리하므로 16종 외엔 그대로 404.
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return PET_TYPE_CODES.map((type) => ({ type }));
