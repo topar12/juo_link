@@ -1,26 +1,20 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/d1";
+import { getStats } from "@/lib/petbtiDb";
 
 export const dynamic = "force-dynamic";
 
-/** 유형별 집계 + total 을 반환한다. 형태: { EGA: n, ..., total: n } */
+/**
+ * 공개 읽기 — 유형별 집계 + total. 형태: { ESBG: n, ..., total: n }.
+ * 엣지 캐시(s-maxage 60s)로 빠르게 제공.
+ * 실패 시 200 + null → 희귀도 배지만 숨기고 앱은 계속 동작(무해).
+ */
 export async function GET() {
   try {
-    const { results } = await getDb()
-      .prepare("SELECT type_code, count FROM petbti_stats")
-      .all<{ type_code: string; count: number }>();
-
-    const stats: Record<string, number> = {};
-    let total = 0;
-    for (const row of results) {
-      stats[row.type_code] = row.count;
-      total += row.count;
-    }
-    stats.total = total;
-    return NextResponse.json(stats);
-  } catch (error) {
-    console.error("petbti stats fetch failed:", error);
-    // 실패해도 앱은 계속 동작(배지만 숨김)
+    return NextResponse.json(await getStats(), {
+      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+    });
+  } catch (e) {
+    console.error("petbti stats failed:", e);
     return NextResponse.json(null);
   }
 }

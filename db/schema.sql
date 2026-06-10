@@ -4,10 +4,30 @@ CREATE TABLE IF NOT EXISTS petbti_stats (
   count     INTEGER NOT NULL DEFAULT 0
 );
 
--- 8개 유형 시드 (없을 때만)
+-- 16개 유형 시드 (없을 때만) — 4축 16유형 리빌드
 INSERT OR IGNORE INTO petbti_stats (type_code, count) VALUES
-  ('EGA', 0), ('EGI', 0), ('EPI', 0), ('EPA', 0),
-  ('CGA', 0), ('CGI', 0), ('CPA', 0), ('CPI', 0);
+  ('ESBG',0),('ESBP',0),('ESTG',0),('ESTP',0),('ERBG',0),('ERBP',0),('ERTG',0),('ERTP',0),
+  ('CSBG',0),('CSBP',0),('CSTG',0),('CSTP',0),('CRBG',0),('CRBP',0),('CRTG',0),('CRTP',0);
+
+-- 멍BTI 원시 응답 로그 (문항 분포 분석용)
+CREATE TABLE IF NOT EXISTS petbti_responses (
+  id          TEXT PRIMARY KEY,
+  result_type TEXT NOT NULL,
+  answers     TEXT NOT NULL,
+  created_at  INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_petbti_responses_created ON petbti_responses(created_at);
+CREATE INDEX IF NOT EXISTS idx_petbti_responses_type    ON petbti_responses(result_type);
+
+-- 유형별 추천 제품 (미설정 시 types.ts 기본값으로 폴백, /admin 에서 편집)
+CREATE TABLE IF NOT EXISTS petbti_products (
+  type_code    TEXT PRIMARY KEY,
+  product_name TEXT NOT NULL,
+  image_url    TEXT,
+  reason       TEXT,
+  shop_url     TEXT,
+  updated_at   INTEGER NOT NULL DEFAULT 0
+);
 
 -- 음식 안전 데이터 (foodSafety.json 대체 단일 소스, /admin 에서 편집)
 CREATE TABLE IF NOT EXISTS foods (

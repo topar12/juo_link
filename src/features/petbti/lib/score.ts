@@ -1,3 +1,4 @@
+import { AXES, PET_TYPE_CODES } from "../data/types";
 import type { AxisKey, Pole, PetTypeCode } from "../data/types";
 
 export interface QuizOption {
@@ -14,9 +15,19 @@ export interface Question {
 
 /**
  * 12개 응답(문항 순서대로 pole) → 4글자 유형 코드.
- * 축당 3문항 다수결, 축당 홀수라 동점 없음.
- * Task A2 에서 구현.
+ * AXES 순서대로 3개씩 슬라이스, 축당 first pole 이 2개 이상이면 first 아니면 second.
+ * 축당 3문항(홀수)이라 동점이 없다. 잘못된 길이/코드는 throw.
  */
-export function calculateResult(_answers: Pole[]): PetTypeCode {
-  throw new Error("not implemented");
+export function calculateResult(answers: Pole[]): PetTypeCode {
+  if (answers.length !== 12) throw new Error(`expected 12 answers, got ${answers.length}`);
+  let code = "";
+  AXES.forEach((axis, i) => {
+    const slice = answers.slice(i * 3, i * 3 + 3);
+    const firstCount = slice.filter((p) => p === axis.poles.first).length;
+    code += firstCount >= 2 ? axis.poles.first : axis.poles.second; // 홀수라 동점 없음
+  });
+  if (!(PET_TYPE_CODES as readonly string[]).includes(code)) {
+    throw new Error(`invalid code: ${code}`);
+  }
+  return code as PetTypeCode;
 }
