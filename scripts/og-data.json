@@ -1,0 +1,18 @@
+{
+  "ESBG": { "nickname": "인싸 먹보 모험왕", "color": "#E8552E" },
+  "ESBP": { "nickname": "프로 인싸 미식가", "color": "#E08A3C" },
+  "ESTG": { "nickname": "조심성 먹보 마당발", "color": "#6FA85B" },
+  "ESTP": { "nickname": "예민한 분위기메이커", "color": "#4FA3A0" },
+  "ERBG": { "nickname": "우리집 파괴왕 먹보", "color": "#D94833" },
+  "ERBP": { "nickname": "집에서만 용감한 까칠가이", "color": "#C05A4D" },
+  "ERTG": { "nickname": "소심한 에너지 먹보", "color": "#7E9A57" },
+  "ERTP": { "nickname": "예민한 집순이 댕댕", "color": "#8E7CC3" },
+  "CSBG": { "nickname": "느긋한 인싸 대식가", "color": "#E0A35E" },
+  "CSBP": { "nickname": "여유로운 미식 신사", "color": "#D98BA0" },
+  "CSTG": { "nickname": "온순한 먹보 친구", "color": "#9DB17C" },
+  "CSTP": { "nickname": "다정한 까탈 선비", "color": "#7AA0B8" },
+  "CRBG": { "nickname": "마이웨이 먹보 대장", "color": "#B5743F" },
+  "CRBP": { "nickname": "도도한 1인 미식가", "color": "#B0728E" },
+  "CRTG": { "nickname": "조용한 먹보 선비", "color": "#8B8C81" },
+  "CRTP": { "nickname": "고독한 미식 황제", "color": "#5D7A8C" }
+}
