@@ -62,8 +62,8 @@ for (const code of CODES) {
   }
   const { color } = entry;
 
-  // 런타임 카드(ResultCard/StoryCard)와 동일 경로 — 주멍이 PNG 드롭 위치를 한 곳으로 통일.
-  const dogPath = join(ROOT, "public", "images", "petbti", "jumeong", `${code}.png`);
+  // 런타임 카드(ResultCard/StoryCard)와 동일 경로·형식(webp) — import-jumeong.mjs 산출물.
+  const dogPath = join(ROOT, "public", "images", "petbti", "jumeong", `${code}.webp`);
   const hasDog = existsSync(dogPath);
 
   const slot = hasDog

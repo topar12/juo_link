@@ -157,31 +157,32 @@ CREATE TABLE IF NOT EXISTS petbti_products (
 - 결과카드(1:1)·스토리카드(9:16)는 런타임 DOM(주멍이 `<img>` + 텍스트 오버레이) → snapdom 캡처. 스토리카드는 화면 밖 1080×1920 별도 DOM.
 - 유형 컬러: 16유형 팔레트 상수(`src/features/petbti/data/types.ts`). 로딩 연출 = 주멍이가 결과지 굽는 2~3초.
 
-### 주멍이 16유형 이미지 생성 프롬프트
+### 주멍이 이미지 생성 프롬프트 — 남은 4개 (개선판)
+
+**진행**: 12/16 완료 — ESBG·ESBP·ESTG·ESTP·ERBG·ERBP·ERTG·ERTP·CSBG·CSBP·CSTG·CRBP (주멍이·주냥이 카메오 정상, `.webp` 변환·배선 완료). **남은 4개 = CSTP·CRBG·CRTG·CRTP** — 전부 차분·내향 계열이라 기존 프롬프트가 정적·밋밋했음 → 장면·소품·동작을 구체화해 성향이 한눈에 읽히게 재작성. 이 4컷은 **주냥이 카메오 없음**(카메오 5컷은 모두 완료).
 
 **공통 규칙(사용자 작업툴에서 주멍이 레퍼런스를 `THIS DOG CHARACTER`로 첨부 후, 각 프롬프트 앞에 프리픽스로 사용)**:
 > `STYLE: soft pastel watercolor and colored-pencil children's-book illustration, warm and cozy, gentle linework, bright airy lighting, cute but not saccharine. Square 1:1 composition, THIS DOG CHARACTER centered occupying ~60%, generous soft pastel background extending to all edges with empty negative space at top and sides for later text overlay and cropping. Keep THIS DOG CHARACTER perfectly on-model and consistent. No text, no letters, no words, no logos in the image.`
 
-각 유형 = 위 STYLE 프리픽스 + 아래 SCENE:
+각 유형 = 위 STYLE 프리픽스 + 아래 SCENE. 각 컷에 **의도**(성향을 어떻게 보여줄지)를 붙여 더 명확히 한다.
 
-1. **ESBG** — `SCENE: THIS DOG CHARACTER bounding joyfully across a sunny park toward a treat, ears flying, big bright open-mouth smile, happy puppies and people softly blurred behind, a scattered trail of kibble, dynamic energetic leaping pose. CAMEO: THIS CAT CHARACTER cheering from the side as a small background cameo.`
-2. **ESBP** — `SCENE: THIS DOG CHARACTER at a chic pet cafe surrounded by friends, sitting upright with a confident charming smile, one paw raised, carefully sniffing a single gourmet biscuit with a slightly discerning look, social yet picky. CAMEO: THIS CAT CHARACTER lounging nearby among the friends as a small cameo.`
-3. **ESTG** — `SCENE: THIS DOG CHARACTER at a lively gathering of dog friends, tail wagging excitedly, pausing with a curious tilted head to cautiously sniff one new unfamiliar treat, lots of snacks around, friendly but careful.`
-4. **ESTP** — `SCENE: THIS DOG CHARACTER as the cheerful center of a friendly little party, surrounded by pals, but hesitating in front of a strange-looking snack with a delicately skeptical raised eyebrow, dainty refined posture.`
-5. **ERBG** — `SCENE: THIS DOG CHARACTER indoors in a cozy pastel living room gleefully tearing apart a cushion with soft stuffing flying everywhere, wearing a cute knit sweater, mischievous triumphant grin, bold and bursting with energy at home.`
-6. **ERBP** — `SCENE: THIS DOG CHARACTER ruling its home turf, standing boldly on a sofa over a pile of toys, turning its nose up at an ordinary offered snack with an aloof picky expression, cozy indoor pastel room.`
-7. **ERTG** — `SCENE: THIS DOG CHARACTER playing energetically in a corner of its home, freezing mid-play to glance nervously toward the front door at a sound, yet still eagerly eyeing a treat bowl, shy outside but hungry, warm interior.`
-8. **ERTP** — `SCENE: THIS DOG CHARACTER curled cautiously on its bed in a quiet home, peeking warily, delicately sniffing a premium treat with suspicious sensitivity, soft muted pastels, sensitive homebody.`
-9. **CSBG** — `SCENE: THIS DOG CHARACTER lounging relaxed on a cafe sofa, calmly and warmly greeting visitors with a gentle smile while happily munching a big chew bone, easygoing big eater, sunny cozy cafe. CAMEO: THIS CAT CHARACTER curled up beside it as a gentle cameo.`
-10. **CSBP** — `SCENE: THIS DOG CHARACTER sitting elegantly like a little gentleman, calmly welcoming a guest, savoring a single fancy bakery treat on a small plate with refined poise, soft luxurious pastel interior. CAMEO: THIS CAT CHARACTER sitting elegantly nearby as a small cameo guest.`
-11. **CSTG** — `SCENE: THIS DOG CHARACTER sitting gently among friendly people, calm and sweet, thoughtfully sniffing a new treat before contentedly eating it, warm cozy domestic scene. CAMEO: THIS CAT CHARACTER resting among the friendly group as a small cameo.`
-12. **CSTP** — `SCENE: THIS DOG CHARACTER as a gentle scholarly little dog, calmly sociable but carefully examining a gourmet morsel with a discerning thoughtful expression, tidy serene pastel setting.`
-13. **CRBG** — `SCENE: THIS DOG CHARACTER alone and self-assured, confidently conquering a large chew bone all by itself on a rug, independent and content, relaxed solo pose, cozy quiet room.`
-14. **CRBP** — `SCENE: THIS DOG CHARACTER alone and dignified like royalty, elegantly savoring a premium jerky treat with refined pickiness, poised solo pose, soft regal pastel interior.`
-15. **CRTG** — `SCENE: THIS DOG CHARACTER quietly and contentedly enjoying a chew by itself in a serene corner, composed and scholarly, peaceful solo moment, gentle warm light.`
-16. **CRTP** — `SCENE: THIS DOG CHARACTER as a solitary gourmet emperor on a plush cushion wearing a tiny delicate crown, calmly accepting only the finest single treat with a refined discerning look, elegant pastel room.`
+#### CSTP — 다정한 까탈 선비 (차분·사교·신중·까탈)
+**의도**: 사람 곁엔 다정하지만 간식만은 까다롭게 고르는 선비. "여러 개 중 딱 하나를 신중히 고르는" 순간으로 *다정함 + 까탈*을 동시에 읽히게. (밋밋했던 원안: "morsel 하나 examining" → 트레이·선택 동작·따뜻한 동석으로 구체화)
+> `SCENE: THIS DOG CHARACTER sitting politely and affectionately right next to its owner at a low wooden table in a cozy book-lined study, three little treats arranged on a small ceramic tray, leaning in to delicately sniff and inspect each one in turn with a thoughtful, refined, slightly fussy expression, about to pick only the single most perfect piece, warm afternoon light through the window, gentle and sweet yet clearly particular.`
 
-**주냥이 카메오(확정)**: 사교(S) 유형 중 손님맞이·친구 장면이 자연스러운 5컷(ESBG·ESBP·CSBG·CSBP·CSTG)에 주냥이를 곁들인다. 작업툴에서 주냥이 레퍼런스를 `THIS CAT CHARACTER`로 함께 첨부하고 해당 SCENE의 카메오 지시를 따른다. 주냥이는 **배경 보조(주멍이가 주연)**, 향후 냥BTI 확장 포석.
+#### CRBG — 마이웨이 먹보 대장 (차분·낯가림·대담·식탐)
+**의도**: 혼자서도 당당한 독립 대식가. 큰 간식을 앞발로 꽉 잡고 "내 왕국에서 혼자 만족"하는 여유·자신감으로 *대담 + 식탐 + 독립*을. (원안의 정적인 "conquering a chew" → 널브러진 당당한 포즈 + 몰입한 표정으로 생동감)
+> `SCENE: THIS DOG CHARACTER sprawled confidently and comfortably on a thick soft rug in its own sunny corner, gripping a big hearty chew bone between both front paws and gnawing it with focused, blissful satisfaction, totally content all on its own with a relaxed "king of my own little castle" air, a basket of toys behind it, warm cozy den-like room, independent and unbothered.`
+
+#### CRTG — 조용한 먹보 선비 (차분·낯가림·신중·식탐)
+**의도**: 조용·의젓하되 복스럽게 즐기는 선비. **CRBG와의 차별점** = 대담하게 널브러진 대장과 달리, *단정히 앉아 눈을 지그시 감고 음미하는 '다도 같은' 차분함*. (원안의 막연한 "serene corner" → 창가·책더미·반쯤 감은 눈의 명상적 순간으로)
+> `SCENE: THIS DOG CHARACTER sitting upright and very neatly in a serene tidy nook beside a sunlit window, quietly and contentedly savoring a long chew with eyes gently half-closed in peaceful enjoyment, calm and composed like a little scholar sipping tea, a small stack of books and a potted plant nearby, soft muted pastels, gentle warm light, a quiet meditative moment.`
+
+#### CRTP — 고독한 미식 황제 (차분·낯가림·신중·까탈)
+**의도**: 1티어 미식가 황제마마. 정적인 "방석 위 왕관" 대신 *작은 왕관 + 은쟁반에 바쳐진 단 하나의 최고급 간식*을 음미하는 '왕좌' 연출로 까탈·고독·품격을 끌어올림. (CSBP의 손님맞이와 달리 **완전한 1인 왕좌**라 고독·도도함이 핵심)
+> `SCENE: THIS DOG CHARACTER seated regally like a tiny emperor on a plush velvet cushion throne, wearing a small delicate golden crown, a single exquisite premium treat presented on a little silver tray right before it, regarding the treat with refined discerning approval and quiet dignified satisfaction, elegant warm softly-lit royal interior with drapery, entirely alone, every inch the solitary connoisseur who accepts only the very finest.`
+
+> 완료된 12컷의 원본 프롬프트(+ 주냥이 카메오 5컷 지시)는 첨부용 프롬프트 시트 [`2026-06-10-petbti-jumeong-prompts.md`](2026-06-10-petbti-jumeong-prompts.md)에 보존.
 
 ---
 

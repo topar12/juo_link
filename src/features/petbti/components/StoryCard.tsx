@@ -32,7 +32,7 @@ const StoryCard = forwardRef<HTMLDivElement, StoryCardProps>(function StoryCard(
   ref
 ) {
   const [jumeongFailed, setJumeongFailed] = useState(false);
-  const jumeongSrc = `/images/petbti/jumeong/${meta.code}.png`;
+  const jumeongSrc = `/images/petbti/jumeong/${meta.code}.webp`;
   const accent = meta.color;
 
   return (

@@ -29,7 +29,7 @@ function withAlpha(hex: string, alpha: number): string {
 export default function ResultCard({ meta, userPhoto }: ResultCardProps) {
   // 주멍이 이미지 로드 실패 시 색 배경 폴백으로 전환(이미지 미제공 단계에서도 깨지지 않게).
   const [jumeongFailed, setJumeongFailed] = useState(false);
-  const jumeongSrc = `/images/petbti/jumeong/${meta.code}.png`;
+  const jumeongSrc = `/images/petbti/jumeong/${meta.code}.webp`;
   const accent = meta.color;
 
   return (

@@ -2,7 +2,9 @@
 
 > 작업툴/외주 첨부용. 주멍이 캐릭터를 `THIS DOG CHARACTER`로 첨부하고, 각 유형의 SCENE을 STYLE 프리픽스 뒤에 붙여 생성한다.
 > **🐱 카메오 5컷**(ESBG·ESBP·CSBG·CSBP·CSTG)은 주냥이를 `THIS CAT CHARACTER`로 **함께 첨부**하고 SCENE 끝의 CAMEO 지시를 따른다(주냥이는 배경 보조, 주멍이가 주연).
-> 결과 파일명: `{유형코드}.png` → `public/images/petbti/jumeong/` 한 폴더에 드롭. 권장 1024×1024 PNG.
+> 파일명 `{유형코드}.jpeg`(또는 png)로 저장 → **레포 부모 폴더 `D:\a_linkinbio`**에 드롭 → `node scripts/import-jumeong.mjs` 실행하면 `public/images/petbti/jumeong/{코드}.webp`로 자동 최적화. 권장 1024×1024.
+>
+> **진행: 12/16 완료. 남은 4 = CSTP·CRBG·CRTG·CRTP** — 아래 해당 항목의 **(개선판)** 프롬프트 사용(더 또렷하게 재작성).
 
 ## 카메오 한눈에 보기
 
@@ -94,14 +96,16 @@ SCENE: THIS DOG CHARACTER sitting elegantly like a little gentleman, calmly welc
 SCENE: THIS DOG CHARACTER sitting gently among friendly people, calm and sweet, thoughtfully sniffing a new treat before contentedly eating it, warm cozy domestic scene. CAMEO: THIS CAT CHARACTER resting among the friendly group as a small cameo.
 ```
 
-### 12. CSTP — 다정한 까탈 선비
+### 12. CSTP — 다정한 까탈 선비 　(개선판)
+> 의도: 사람 곁엔 다정하지만 간식은 까다롭게 — 트레이의 여럿 중 딱 하나를 신중히 고르는 순간.
 ```
-SCENE: THIS DOG CHARACTER as a gentle scholarly little dog, calmly sociable but carefully examining a gourmet morsel with a discerning thoughtful expression, tidy serene pastel setting.
+SCENE: THIS DOG CHARACTER sitting politely and affectionately right next to its owner at a low wooden table in a cozy book-lined study, three little treats arranged on a small ceramic tray, leaning in to delicately sniff and inspect each one in turn with a thoughtful, refined, slightly fussy expression, about to pick only the single most perfect piece, warm afternoon light through the window, gentle and sweet yet clearly particular.
 ```
 
-### 13. CRBG — 마이웨이 먹보 대장
+### 13. CRBG — 마이웨이 먹보 대장 　(개선판)
+> 의도: 혼자서도 당당한 독립 대식가 — 큰 간식을 앞발로 꽉 잡고 "내 왕국에서 혼자 만족"하는 여유. (CRTG와 달리 널브러진 당당함)
 ```
-SCENE: THIS DOG CHARACTER alone and self-assured, confidently conquering a large chew bone all by itself on a rug, independent and content, relaxed solo pose, cozy quiet room.
+SCENE: THIS DOG CHARACTER sprawled confidently and comfortably on a thick soft rug in its own sunny corner, gripping a big hearty chew bone between both front paws and gnawing it with focused, blissful satisfaction, totally content all on its own with a relaxed "king of my own little castle" air, a basket of toys behind it, warm cozy den-like room, independent and unbothered.
 ```
 
 ### 14. CRBP — 도도한 1인 미식가
@@ -109,14 +113,16 @@ SCENE: THIS DOG CHARACTER alone and self-assured, confidently conquering a large
 SCENE: THIS DOG CHARACTER alone and dignified like royalty, elegantly savoring a premium jerky treat with refined pickiness, poised solo pose, soft regal pastel interior.
 ```
 
-### 15. CRTG — 조용한 먹보 선비
+### 15. CRTG — 조용한 먹보 선비 　(개선판)
+> 의도: 조용·의젓하되 복스럽게 — 단정히 앉아 눈을 지그시 감고 음미하는 '다도 같은' 차분함. (CRBG의 대담한 널브러짐과 대비)
 ```
-SCENE: THIS DOG CHARACTER quietly and contentedly enjoying a chew by itself in a serene corner, composed and scholarly, peaceful solo moment, gentle warm light.
+SCENE: THIS DOG CHARACTER sitting upright and very neatly in a serene tidy nook beside a sunlit window, quietly and contentedly savoring a long chew with eyes gently half-closed in peaceful enjoyment, calm and composed like a little scholar sipping tea, a small stack of books and a potted plant nearby, soft muted pastels, gentle warm light, a quiet meditative moment.
 ```
 
-### 16. CRTP — 고독한 미식 황제
+### 16. CRTP — 고독한 미식 황제 　(개선판)
+> 의도: 1티어 미식가 황제마마 — 작은 왕관 + 은쟁반에 바쳐진 단 하나의 최고급 간식을 음미하는 '1인 왕좌'. (CSBP의 손님맞이와 달리 완전한 고독·도도함)
 ```
-SCENE: THIS DOG CHARACTER as a solitary gourmet emperor on a plush cushion wearing a tiny delicate crown, calmly accepting only the finest single treat with a refined discerning look, elegant pastel room.
+SCENE: THIS DOG CHARACTER seated regally like a tiny emperor on a plush velvet cushion throne, wearing a small delicate golden crown, a single exquisite premium treat presented on a little silver tray right before it, regarding the treat with refined discerning approval and quiet dignified satisfaction, elegant warm softly-lit royal interior with drapery, entirely alone, every inch the solitary connoisseur who accepts only the very finest.
 ```
 
 ---
