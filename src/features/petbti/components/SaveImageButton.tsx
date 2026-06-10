@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode, type RefObject } from "react";
+import { useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 
 // snapdom 으로 캡처 대상(ref) DOM 을 PNG 로 저장하는 버튼.
 // - snapdom 은 클릭 시점에 동적 import (서버 평가·초기 번들 회피).
@@ -18,6 +18,7 @@ type SaveImageButtonProps = {
   /** 저장 성공 후 콜백(예: 분석 이벤트·토스트). */
   onSaved?: () => void;
   className?: string;
+  style?: CSSProperties;
   /** 접근성 라벨(아이콘만 있는 경우). */
   ariaLabel?: string;
 };
@@ -28,6 +29,7 @@ export default function SaveImageButton({
   label = "이미지 저장",
   onSaved,
   className,
+  style,
   ariaLabel,
 }: SaveImageButtonProps) {
   const [busy, setBusy] = useState(false);
@@ -67,6 +69,7 @@ export default function SaveImageButton({
       disabled={busy}
       aria-label={ariaLabel}
       aria-busy={busy}
+      style={style}
       className={
         className ??
         "hide-on-capture inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-charcoal bg-charcoal px-5 py-3 text-sm font-bold text-offwhite transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"

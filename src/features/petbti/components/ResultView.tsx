@@ -110,16 +110,25 @@ export default function ResultView({ meta }: { meta: TypeMeta }) {
   const ogUrl = origin ? `${origin}/og/petbti/${meta.code}.png` : `/og/petbti/${meta.code}.png`;
 
   return (
-    <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col gap-8 overflow-y-auto bg-offwhite px-5 py-8">
-      {/* 결과 카드 (1:1 캡처 대상) */}
+    <main className="mx-auto flex h-full w-full max-w-md flex-col gap-8 overflow-y-auto bg-offwhite px-5 py-8">
+      {/* 결과 카드 (캡처 대상) */}
       <div className="flex flex-col items-center gap-4">
+        <RarityBadge code={meta.code} />
         <div ref={cardRef} className="w-full max-w-[420px]">
           <ResultCard meta={meta} userPhoto={userPhoto} />
         </div>
 
-        <div className="hide-on-capture flex flex-wrap items-center justify-center gap-2">
-          <RarityBadge code={meta.code} />
-          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-charcoal/15 bg-white px-4 py-2 text-xs font-bold text-charcoal/70 transition-colors hover:border-charcoal/30">
+        {/* 주요 액션 — 이미지 저장(다운로드, 강조) + 우리 아이 사진 넣기 */}
+        <div className="hide-on-capture flex w-full max-w-[420px] flex-col gap-2">
+          <SaveImageButton
+            targetRef={cardRef}
+            filename={`멍BTI_${meta.code}`}
+            label="📸 결과 이미지 저장"
+            onSaved={() => trackPetbti("result_download", { result_type: meta.code })}
+            style={{ backgroundColor: accent }}
+            className="hide-on-capture inline-flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-black text-white shadow-lg transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+          />
+          <label className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-2xl border-2 border-charcoal/15 bg-white px-4 py-2.5 text-xs font-bold text-charcoal/70 transition-colors hover:border-charcoal/30">
             📷 우리 아이 사진 넣기
             <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           </label>
@@ -225,26 +234,17 @@ export default function ResultView({ meta }: { meta: TypeMeta }) {
         </a>
       </section>
 
-      {/* 공유 + 저장 */}
+      {/* 공유 */}
       <section className="hide-on-capture flex flex-col gap-3">
         <h2 className="text-xs font-black uppercase tracking-[0.2em] text-charcoal/40">공유하기</h2>
         <ShareButtons meta={meta} resultUrl={resultUrl} ogUrl={ogUrl} />
-        <div className="flex flex-wrap gap-2">
-          <SaveImageButton
-            targetRef={cardRef}
-            filename={`멍BTI_${meta.code}`}
-            label="결과 이미지 저장"
-            onSaved={() => trackPetbti("result_download", { result_type: meta.code })}
-            className="hide-on-capture inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-charcoal/20 bg-white px-4 py-3 text-sm font-bold text-charcoal transition-all hover:border-charcoal/40 disabled:opacity-60"
-          />
-          <SaveImageButton
-            targetRef={storyRef}
-            filename={`멍BTI_스토리_${meta.code}`}
-            label="스토리용 저장 (9:16)"
-            onSaved={() => trackPetbti("result_download", { result_type: meta.code, format: "story" })}
-            className="hide-on-capture inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-charcoal/20 bg-white px-4 py-3 text-sm font-bold text-charcoal transition-all hover:border-charcoal/40 disabled:opacity-60"
-          />
-        </div>
+        <SaveImageButton
+          targetRef={storyRef}
+          filename={`멍BTI_스토리_${meta.code}`}
+          label="📲 인스타 스토리용 저장 (9:16)"
+          onSaved={() => trackPetbti("result_download", { result_type: meta.code, format: "story" })}
+          className="hide-on-capture inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-charcoal/20 bg-white px-4 py-3 text-sm font-bold text-charcoal transition-all hover:border-charcoal/40 disabled:cursor-not-allowed disabled:opacity-60"
+        />
       </section>
 
       {/* 인스타 인증 이벤트 (동선만 — 추첨 운영은 추후) */}
