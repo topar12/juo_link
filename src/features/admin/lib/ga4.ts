@@ -64,6 +64,9 @@ export type Ga4FilterExpression = {
   andGroup?: {
     expressions: Ga4FilterExpression[];
   };
+  orGroup?: {
+    expressions: Ga4FilterExpression[];
+  };
 };
 
 export type Ga4RunReportRequest = {

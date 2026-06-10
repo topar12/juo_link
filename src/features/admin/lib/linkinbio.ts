@@ -1,3 +1,4 @@
+import { getBrandHosts } from "@/lib/brandDomains";
 import type { Ga4FilterExpression } from "./ga4";
 
 export const LINKINBIO_BRANDS = [
@@ -6,12 +7,41 @@ export const LINKINBIO_BRANDS = [
   { id: "lovejuo", label: "사랑해주오" },
 ] as const;
 
+/**
+ * 브랜드별 GA4 dimension 필터.
+ *
+ * 브랜드는 서브도메인(예: 펫푸드.주오.info)으로 서빙된다. middleware가 서브도메인 루트를
+ * 내부적으로 /<brand>로 rewrite하지만 주소창 경로(=GA4 pagePath)는 "/" 그대로이므로,
+ * 서브도메인 방문자는 hostName으로 잡아야 한다. pagePath=/<brand> 만으로 필터하면 누락된다.
+ *
+ * 과거 경로 방식(예: *.workers.dev/<brand> 직접 접근) 트래픽도 잃지 않도록 pagePath EXACT
+ * 매칭을 OR로 함께 둔다. (한 row는 hostName·pagePath 조합이 하나이므로 OR로 중복 집계되지 않음)
+ *
+ * NOTE: GA4 hostName이 punycode/unicode 중 무엇으로 기록되는지는 배포 후 라이브 데이터로
+ * 재확인 필요 — 안전하게 두 형태를 모두 inList에 넣는다(getBrandHosts).
+ */
 export function buildBrandFilter(brand: string | null): Ga4FilterExpression | null {
   if (!brand || brand === "all") return null;
-  return {
+
+  const pagePathFilter: Ga4FilterExpression = {
     filter: {
       fieldName: "pagePath",
       stringFilter: { value: `/${brand}`, matchType: "EXACT" },
+    },
+  };
+
+  const hosts = getBrandHosts(brand);
+  if (hosts.length === 0) {
+    // 서브도메인 매핑이 없는 브랜드 — 기존 경로 매칭만 유지(방어적).
+    return pagePathFilter;
+  }
+
+  return {
+    orGroup: {
+      expressions: [
+        { filter: { fieldName: "hostName", inListFilter: { values: hosts } } },
+        pagePathFilter,
+      ],
     },
   };
 }

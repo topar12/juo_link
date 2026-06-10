@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveBrandFromHost } from "./brandDomains";
+import { getBrandHosts, resolveBrandFromHost } from "./brandDomains";
 
 describe("resolveBrandFromHost", () => {
   it("펫푸드 서브도메인(punycode) → petfoodjuo", () => {
@@ -33,5 +33,22 @@ describe("resolveBrandFromHost", () => {
     expect(resolveBrandFromHost("")).toBeNull();
     expect(resolveBrandFromHost(null)).toBeNull();
     expect(resolveBrandFromHost(undefined)).toBeNull();
+  });
+});
+
+describe("getBrandHosts", () => {
+  it("브랜드 → punycode 서브도메인 호스트(GA4 hostName이 기록하는 형태)를 돌려준다", () => {
+    expect(getBrandHosts("petfoodjuo")).toContain("xn--hy1b679cura.xn--vk5b15c.info");
+    expect(getBrandHosts("lovejuo")).toContain("xn--9i2br6obor.xn--vk5b15c.info");
+  });
+
+  it("유니코드 호스트도 방어적으로 함께 포함한다", () => {
+    expect(getBrandHosts("petfoodjuo")).toContain("펫푸드.주오.info");
+    expect(getBrandHosts("lovejuo")).toContain("사랑해.주오.info");
+  });
+
+  it("매핑되지 않은 브랜드나 'all'은 빈 배열", () => {
+    expect(getBrandHosts("nope")).toEqual([]);
+    expect(getBrandHosts("all")).toEqual([]);
   });
 });
