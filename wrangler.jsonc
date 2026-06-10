@@ -7,6 +7,13 @@
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
+  // GA4 대시보드용 비밀 아닌 환경변수. GA4_PRIVATE_KEY 는 시크릿이므로
+  // 여기 두지 않고 `wrangler secret put GA4_PRIVATE_KEY` 로 별도 주입한다.
+  "vars": {
+    "GA4_CLIENT_EMAIL": "ga4-dashboard@juo-company-491405.iam.gserviceaccount.com",
+    "GA4_PROPERTY_ID": "530064801",
+    "GA4_LINKINBIO_PROPERTY_ID": "531741905"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

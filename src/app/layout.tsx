@@ -14,16 +14,13 @@ export default function RootLayout({
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
+  // 루트 레이아웃은 문서 셸(<html>/<body>)만 담당한다.
+  // 폰 목업 프레임은 (site) 그룹 레이아웃으로 옮겼으므로, /admin 같은
+  // 그룹 밖 라우트는 전체 화면을 그대로 사용할 수 있다.
   return (
     <html lang="ko" className="antialiased">
-      <body className="min-h-screen flex items-center justify-center selection:bg-brand-coral-500 selection:text-white">
-        {/* Desktop Mockup Wrapper */}
-        <div className="relative w-full max-w-[430px] h-[100dvh] sm:h-[850px] sm:max-h-[90vh] sm:rounded-[3rem] sm:border-[12px] sm:border-slate-800 bg-slate-50 overflow-hidden sm:shadow-2xl">
-          {/* Mockup Notch */}
-          <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-36 h-7 bg-slate-800 rounded-b-3xl z-50"></div>
-          
-          {children}
-        </div>
+      <body className="selection:bg-brand-coral-500 selection:text-white">
+        {children}
       </body>
       {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </html>
