@@ -26,12 +26,16 @@ const TOTAL = QUESTIONS.length; // 12
 export default function QuizClient() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("intro");
-  const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Pole[]>([]);
   const [participantTotal, setParticipantTotal] = useState<number | null>(null);
   // 방향(앞/뒤) — 카드 전환 애니메이션 방향 결정.
   const [direction, setDirection] = useState<1 | -1>(1);
   const hasFetchedRef = useRef(false);
+
+  // 현재 문항 인덱스는 answers.length 에서 파생(단일 소스). 별도 index state 를 두면
+  // 빠른 더블탭에서 함수형 setIndex(+1)와 값기반 setAnswers 가 어긋나 인덱스가 answers 를
+  // 앞질러 QUESTIONS[index] 가 undefined → question.prompt 크래시가 났다. 파생으로 원천 차단.
+  const index = answers.length;
 
   // 인트로 누적 참여수 — 마운트 시 1회 fetch, 실패는 조용히 무시.
   useEffect(() => {
@@ -59,33 +63,29 @@ export default function QuizClient() {
   function startQuiz() {
     trackPetbti("quiz_start");
     setDirection(1);
-    setIndex(0);
     setAnswers([]);
     setPhase("question");
   }
 
   function selectOption(pole: Pole) {
-    const next = [...answers.slice(0, index), pole];
-    setAnswers(next);
-
-    if (next.length >= TOTAL) {
-      // 마지막 문항 → 굽기 단계로.
-      setPhase("baking");
-      return;
-    }
+    // index === answers.length 이므로 현재 문항 답을 append. 더블탭이어도 같은 결과(멱등).
+    const next = [...answers, pole];
     setDirection(1);
-    setIndex((i) => i + 1);
+    setAnswers(next);
+    if (next.length >= TOTAL) {
+      // 마지막 문항 → 굽기 단계로. (index 는 파생이라 따로 증가시키지 않는다)
+      setPhase("baking");
+    }
   }
 
   function goBack() {
-    if (index === 0) {
+    if (answers.length === 0) {
       setPhase("intro");
       return;
     }
     setDirection(-1);
-    setIndex((i) => i - 1);
-    // 되돌아가면 해당 문항부터 다시 답하도록 누적 답을 잘라낸다.
-    setAnswers((prev) => prev.slice(0, index - 1));
+    // 마지막 답을 하나 빼면 index(=answers.length)가 1 줄어 이전 문항으로. 값기반이라 멱등.
+    setAnswers(answers.slice(0, -1));
   }
 
   function handleBakeDone() {
@@ -177,6 +177,8 @@ export default function QuizClient() {
 
   // ── question ────────────────────────────────────────────
   const question = QUESTIONS[index];
+  // 방어적: 어떤 이유로든 범위를 벗어나도 크래시 대신 안전 처리(파생 index 라 정상은 항상 유효).
+  if (!question) return null;
   const progress = ((index + 1) / TOTAL) * 100;
 
   return (
