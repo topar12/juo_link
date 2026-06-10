@@ -20,3 +20,15 @@ CREATE TABLE IF NOT EXISTS foods (
   note       TEXT,
   updated_at INTEGER NOT NULL DEFAULT 0
 );
+
+-- 매장(제휴처) 데이터 (storeLocations.json 대체 단일 소스, /admin 에서 편집)
+CREATE TABLE IF NOT EXISTS stores (
+  id           TEXT PRIMARY KEY,
+  name         TEXT NOT NULL,
+  category     TEXT NOT NULL,             -- 병원|펫샵|미용|훈련|보호소|기타
+  raw_category TEXT,                      -- 원본 스크랩 라벨(선택)
+  address      TEXT NOT NULL,
+  lat          REAL NOT NULL,
+  lng          REAL NOT NULL,
+  updated_at   INTEGER NOT NULL DEFAULT 0
+);

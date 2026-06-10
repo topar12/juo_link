@@ -6,13 +6,15 @@ import {
   ExternalLink,
   Plus,
   Apple,
+  MapPin,
 } from 'lucide-react';
 import { PROJECTS } from '@/features/admin/lib/constants';
 
 // 호스트 앱은 admin 을 단일 클라이언트 페이지로 로드하므로 next/link·usePathname 대신
 // 상위(AdminDashboard)에서 내려주는 활성 뷰 상태/콜백으로 네비게이션을 처리한다.
-// 'foods' = 음식 데이터 CRUD 편집기(프로젝트가 아닌 데이터 관리 뷰).
-export type AdminView = 'overview' | 'foods' | string;
+// 'foods' = 음식 데이터 CRUD 편집기, 'stores' = 매장 데이터 CRUD 편집기
+// (둘 다 프로젝트가 아닌 데이터 관리 뷰).
+export type AdminView = 'overview' | 'foods' | 'stores' | string;
 
 interface SidebarProps {
   activeView: AdminView;
@@ -110,6 +112,21 @@ export default function Sidebar({ activeView, onSelect }: SidebarProps) {
             className={activeView === 'foods' ? 'text-[#818CF8]' : 'text-[#52525B]'}
           />
           음식 데이터
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelect('stores')}
+          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 ${
+            activeView === 'stores'
+              ? 'bg-[#6366F1]/10 text-[#818CF8]'
+              : 'text-[#A1A1AA] hover:text-white hover:bg-[#1c1c22]'
+          }`}
+        >
+          <MapPin
+            size={16}
+            className={activeView === 'stores' ? 'text-[#818CF8]' : 'text-[#52525B]'}
+          />
+          매장 데이터
         </button>
 
         {/* Settings */}

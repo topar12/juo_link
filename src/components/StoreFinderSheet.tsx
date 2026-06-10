@@ -7,6 +7,9 @@ import { Copy, CrosshairSimple, MagnifyingGlass, MapPin, Sparkle, X } from "@pho
 import clsx from "clsx";
 import storeLocations from "@/data/storeLocations.json";
 import { trackEvent } from "@/lib/analytics";
+// 매장 공유 타입은 @/lib/stores 에서 import (인라인 정의 제거).
+// 공개 API(GET /api/stores)·관리 API·검증 모듈이 같은 정의를 공유한다.
+import { type StoreLocation, type StoreCategory, STORE_CATEGORIES } from "@/lib/stores";
 
 type StoreFinderSheetProps = {
   accentColor?: string;
@@ -14,20 +17,11 @@ type StoreFinderSheetProps = {
   onClose: () => void;
 };
 
-type StoreCategory = "병원" | "펫샵" | "미용" | "훈련" | "보호소" | "기타";
+// 폴백 데이터 — 번들된 시드 JSON. API(/api/stores)가 실패하면 이걸 쓴다.
+// 매장찾기 지도/목록이 절대 비지 않도록(빈 지도 방지) 항상 보유한다.
+const FALLBACK_STORES = storeLocations as StoreLocation[];
 
-const STORE_CATEGORIES: StoreCategory[] = ["병원", "펫샵", "미용", "훈련", "보호소", "기타"];
-
-type StoreLocation = {
-  id: string;
-  name: string;
-  category: StoreCategory;
-  rawCategory: string;
-  address: string;
-  lat: number;
-  lng: number;
-};
-
+// 아래 Kakao* 타입들은 카카오맵 SDK 전용이라 공유하지 않고 이 파일에 인라인 유지.
 type KakaoLatLng = {
   getLat: () => number;
   getLng: () => number;
@@ -184,7 +178,6 @@ export default function StoreFinderSheet({
   onClose,
 }: StoreFinderSheetProps) {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
-  const storeLocationItems = storeLocations as StoreLocation[];
   const mapRef = useRef<KakaoMapInstance | null>(null);
   const markersRef = useRef<KakaoMarkerInstance[]>([]);
   const currentLocationMarkerRef = useRef<KakaoMarkerInstance | null>(null);
@@ -193,6 +186,13 @@ export default function StoreFinderSheet({
   const storeCardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const lastFilterSignatureRef = useRef("");
   const lastSearchSignatureRef = useRef("");
+  // 시트는 열릴 때 마운트되므로(부모가 조건부 렌더), fetch는 마운트당 1회만.
+  // StrictMode 이중 호출·재진입을 막는 가드.
+  const hasFetchedRef = useRef(false);
+
+  // null = 아직 미로딩. fetch 성공 시 D1 데이터, 실패 시 폴백으로 채운다.
+  const [fetchedStores, setFetchedStores] = useState<StoreLocation[] | null>(null);
+  const [isLoadingStores, setIsLoadingStores] = useState(false);
 
   const [mapReady, setMapReady] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
@@ -208,7 +208,13 @@ export default function StoreFinderSheet({
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
   const categoryOptions: Array<StoreCategory | typeof ALL_CATEGORY> = [ALL_CATEGORY, ...STORE_CATEGORIES];
-  const preparedStores = storeLocationItems.map((store, index) => ({
+  // 로딩 첫 프레임에도 빈 지도가 없도록 폴백을 기본값으로 사용.
+  // fetch 성공 시 fetchedStores로 교체되며, 이 배열이 바뀌면 아래 마커 effect가
+  // (filteredStores 의존성으로) 재실행되어 마커가 새 데이터로 다시 그려진다.
+  const stores = fetchedStores ?? FALLBACK_STORES;
+  // 최초 로딩 중(아직 fetch 결과 미반영)에만 로딩 affordance 노출.
+  const showStoreLoading = isLoadingStores && fetchedStores === null;
+  const preparedStores = stores.map((store, index) => ({
     ...store,
     displayName: normalizeStoreName(store.name),
     displayCategories: parseDisplayCategories(store.rawCategory),
@@ -266,6 +272,50 @@ export default function StoreFinderSheet({
       is_direct: store.isDirect ? "true" : "false",
     });
   }, [analyticsPageId]);
+
+  // 시트가 열릴 때(=마운트) /api/stores를 lazy fetch. 로딩 중에도 폴백으로
+  // 지도/목록을 막지 않도록, 화면에 넘기는 데이터는 fetchedStores ?? FALLBACK_STORES로 보장.
+  useEffect(() => {
+    if (hasFetchedRef.current) {
+      return;
+    }
+    hasFetchedRef.current = true;
+
+    // 언마운트 후 늦게 도착한 응답으로 상태를 갱신하지 않기 위한 가드.
+    let aborted = false;
+    setIsLoadingStores(true);
+
+    (async () => {
+      try {
+        const res = await fetch("/api/stores");
+        // 비200(서버/D1 오류는 500)은 폴백으로 처리.
+        if (!res.ok) {
+          throw new Error(`/api/stores responded ${res.status}`);
+        }
+        const data = (await res.json()) as StoreLocation[];
+        // 빈 배열·비배열은 데이터 누락으로 간주 — 빈 지도 방지 위해 폴백 사용.
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("/api/stores returned empty data");
+        }
+        if (!aborted) {
+          setFetchedStores(data);
+        }
+      } catch {
+        // 네트워크 오류·비200·빈 응답 → 번들 폴백으로 매장찾기 유지.
+        if (!aborted) {
+          setFetchedStores(FALLBACK_STORES);
+        }
+      } finally {
+        if (!aborted) {
+          setIsLoadingStores(false);
+        }
+      }
+    })();
+
+    return () => {
+      aborted = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!appKey || !scriptReady || !mapContainerRef.current || mapRef.current) {
@@ -532,6 +582,14 @@ export default function StoreFinderSheet({
                       {scriptError}
                     </div>
                   ) : null}
+                  {/* 매장 데이터 최초 로딩 affordance — 지도 위 작은 pill.
+                      pointer-events-none 으로 지도 조작을 막지 않고, 폴백 덕에 지도는 이미 채워져 있다. */}
+                  {showStoreLoading ? (
+                    <div className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-[2px_2px_0px_0px_rgba(30,41,59,0.08)] backdrop-blur-sm">
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-brand-coral-500" />
+                      매장 불러오는 중…
+                    </div>
+                  ) : null}
                 </>
               ) : (
                 <div className="flex h-[34vh] min-h-[240px] w-full flex-col items-start justify-center gap-2 bg-[linear-gradient(135deg,var(--color-brand-coral-50)_0%,var(--color-brand-coral-100)_100%)] px-5">
@@ -554,7 +612,7 @@ export default function StoreFinderSheet({
             <div className="flex items-center px-1">
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                 <MapPin weight="fill" className="text-brand-coral-500" />
-                <span>{filteredStores.length}개 제휴처</span>
+                <span>{showStoreLoading ? "불러오는 중…" : `${filteredStores.length}개 제휴처`}</span>
                 <button
                   type="button"
                   onClick={() => {
