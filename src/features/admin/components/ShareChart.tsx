@@ -20,7 +20,7 @@ export default function ShareChart({ days }: { days: string }) {
     async function fetchShareData() {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/ga4/share?days=${days}`);
+        const res = await fetch(`/admin/api/ga4/share?days=${days}`);
         if (!res.ok) throw new Error('API Error');
         const json = await res.json();
         if (json.success && isMounted) {

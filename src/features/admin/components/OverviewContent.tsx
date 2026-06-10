@@ -57,7 +57,7 @@ export default function OverviewContent({ onSelect }: OverviewContentProps) {
               results.push({ id: project.id, total: 0, subtitle: '전체 참여', topType: null });
             }
           } else {
-            const res = await fetch('/api/admin/ga4/linkinbio/summary?days=30');
+            const res = await fetch('/admin/api/ga4/linkinbio/summary?days=30');
             const json = await res.json();
             results.push({
               id: project.id,

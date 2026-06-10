@@ -194,12 +194,12 @@ export default function LinkinbioDashboard({ project }: LinkinbioDashboardProps)
         filtersRes,
         storesRes,
       ] = await Promise.all([
-        fetchJson<SummaryResponse>(`/api/admin/ga4/linkinbio/summary?${params}`),
-        fetchJson<TrendPoint[]>(`/api/admin/ga4/linkinbio/trend?${params}`),
-        fetchJson<CountItem[]>(`/api/admin/ga4/linkinbio/traffic?${params}`),
-        fetchJson<CountItem[]>(`/api/admin/ga4/linkinbio/social?${params}`),
-        fetchJson<CountItem[]>(`/api/admin/ga4/linkinbio/filters?${params}`),
-        fetchJson<CountItem[]>(`/api/admin/ga4/linkinbio/stores?${params}`),
+        fetchJson<SummaryResponse>(`/admin/api/ga4/linkinbio/summary?${params}`),
+        fetchJson<TrendPoint[]>(`/admin/api/ga4/linkinbio/trend?${params}`),
+        fetchJson<CountItem[]>(`/admin/api/ga4/linkinbio/traffic?${params}`),
+        fetchJson<CountItem[]>(`/admin/api/ga4/linkinbio/social?${params}`),
+        fetchJson<CountItem[]>(`/admin/api/ga4/linkinbio/filters?${params}`),
+        fetchJson<CountItem[]>(`/admin/api/ga4/linkinbio/stores?${params}`),
       ]);
 
       setSummary(summaryRes.data ?? null);

@@ -23,7 +23,7 @@ export default function FunnelChart({ days }: FunnelChartProps) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/admin/ga4/funnel?days=${days}`);
+        const res = await fetch(`/admin/api/ga4/funnel?days=${days}`);
         const text = await res.text();
         const json = JSON.parse(text);
 

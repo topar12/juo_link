@@ -32,7 +32,7 @@ export default function TrendChart({ days }: TrendChartProps) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/admin/ga4/trend?days=${days}`);
+        const res = await fetch(`/admin/api/ga4/trend?days=${days}`);
         const text = await res.text();
         const json = JSON.parse(text);
 
