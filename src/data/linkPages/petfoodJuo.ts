@@ -154,7 +154,7 @@ export const petfoodJuoPage: LinkPageConfig = {
           description: "몇 가지 질문만으로 우리 아이 맞춤 간식을 찾아보세요",
           imageSrc: "/images/test.webp",
           imageAlt: "멍BTI 맞춤 간식 찾기",
-          href: "https://meong-bti.netlify.app/",
+          href: "/petbti",
           tracking: {
             event: "meongbti_click",
             params: {
