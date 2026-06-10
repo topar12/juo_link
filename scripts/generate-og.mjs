@@ -7,7 +7,7 @@
 //   - 배경 #FDFCF8
 //   - 좌측 14px 유형 컬러 바
 //   - 좌측 440×440 비주얼 슬롯:
-//       · assets/petbti/jumeong/{CODE}.png 가 있으면 contain 합성 (주멍이 일러스트)
+//       · public/images/petbti/jumeong/{CODE}.png 가 있으면 contain 합성 (주멍이 일러스트)
 //       · 없으면 유형 컬러 + "33" 알파 색블록(플레이스홀더)
 //   - 우측 텍스트: 유형 CODE + 영문 브랜드마크
 //
@@ -62,7 +62,8 @@ for (const code of CODES) {
   }
   const { color } = entry;
 
-  const dogPath = join(ROOT, "assets", "petbti", "jumeong", `${code}.png`);
+  // 런타임 카드(ResultCard/StoryCard)와 동일 경로 — 주멍이 PNG 드롭 위치를 한 곳으로 통일.
+  const dogPath = join(ROOT, "public", "images", "petbti", "jumeong", `${code}.png`);
   const hasDog = existsSync(dogPath);
 
   const slot = hasDog
